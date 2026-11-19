@@ -1,0 +1,45 @@
+import { rm } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+import { defineConfig, type Plugin } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
+import sirv from 'sirv'
+
+const media: Plugin = {
+  name: 'chest-log-media',
+  configureServer(server) {
+    server.middlewares.use('/media', sirv(fileURLToPath(new URL('../clips', import.meta.url)), { dev: true }))
+  },
+}
+
+// public/data holds this PC's own matches. The hosted site ships without it: visitors bring their own replays.
+const hostedDescription = 'Count the chests you have opened in Fortnite, straight from your replay files. Nothing is uploaded.'
+
+const hostedSite = (outDir: string): Plugin => ({
+  name: 'chest-log-hosted',
+  apply: 'build',
+  // index.html describes this PC's own site. The public one gets its own description and share image; Vercel
+  // provides the production host at build time, and without it the share image tags are dropped.
+  transformIndexHtml(html) {
+    const host = process.env.VERCEL_PROJECT_PRODUCTION_URL
+    const described = html.replaceAll(/(<meta (?:name="description"|property="og:description") content=")[^"]*"/g, `$1${hostedDescription}"`)
+    return host
+      ? described.replace(/(<meta property="og:image" content=")[^"]*"/, `$1https://${host}/og-hosted.png"`)
+      : described.replaceAll(/\s*<meta (?:property="og:image[^"]*"|name="twitter:card") [^>]*>/g, '')
+  },
+  closeBundle: () => rm(new URL(`./${outDir}/data`, import.meta.url), { recursive: true, force: true }),
+})
+
+/** `--mode hosted` builds the public site into dist-hosted; the default build is the local app in dist. */
+export default defineConfig(({ mode }) => {
+  const hosted = mode === 'hosted'
+  const outDir = hosted ? 'dist-hosted' : 'dist'
+  return {
+    plugins: [tanstackRouter({ target: 'react', autoCodeSplitting: true }), react(), tailwindcss(), hosted ? hostedSite(outDir) : media],
+    resolve: { alias: { '~': fileURLToPath(new URL('./src', import.meta.url)) } },
+    server: { fs: { allow: ['..'] } },
+    worker: { format: 'es' },
+    build: { target: 'es2023', assetsInlineLimit: 0, outDir },
+  }
+})
