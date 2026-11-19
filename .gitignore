@@ -1,0 +1,33 @@
+# Personal data: replays, parsed matches (with other players' names), video clips.
+replays/
+clips/
+data/*
+!data/types.ts
+web/public/data/
+decisions.tsv
+
+# Build output and tools
+node_modules/
+web/dist/
+web/dist-hosted/
+extractor/bin/
+extractor/obj/
+extractor/**/bin/
+extractor/**/obj/
+extractor/.scratch/
+vendor/**/bin/
+vendor/**/obj/
+vendor/FortniteReplayDecompressor/.git-upstream/
+tools/
+__pycache__/
+
+# Earlier experiments, kept on this PC only
+archive/
+proto/
+perf/
+overlay/
+.agents/
+.claude/
+
+.vercel
+.env.local

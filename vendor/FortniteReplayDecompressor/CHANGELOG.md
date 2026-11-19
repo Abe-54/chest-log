@@ -1,0 +1,207 @@
+# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+- More changes and improvements by [SL-x-TnT](https://github.com/SL-x-TnT)
+- Interfaces to support proper DI
+- Register types to be parsed with DI
+
+
+## [3.2.0] - 2026-11-15
+### Changed
+- support .net11
+
+## [3.1.1] - 2026-11-14
+### Added
+- `ReplayReader` and `NetFieldParser`: skip selected export group types with `ignoredExportGroups` (by [Cristiano3120](https://github.com/Cristiano3120))
+- `NetFieldExportGroupPrefixAttribute`: match export groups by path prefix (exact paths still take priority) (by [Cristiano3120](https://github.com/Cristiano3120))
+- `PlayerBuild`: parse player-built structures (`PBWA_*`) (by [Cristiano3120](https://github.com/Cristiano3120))
+- `BatchedDamageCues`: add `SourceWeapon` actor GUID (by [Cristiano3120](https://github.com/Cristiano3120))
+- `ReplayReader`: add `CurrentTimeSeconds` for the active demo frame time (by [Cristiano3120](https://github.com/Cristiano3120))
+
+### Changed
+- switch NuGet package publishing to Trusted Publishing (OIDC)
+
+### Fixed
+- `HealthSet`: read health and shield values from the correct handles and make properties nullable (`null` means not sent) (by [Cristiano3120](https://github.com/Cristiano3120))
+- `NetGuidCache`: retry failed export group paths after new export groups load (by [Cristiano3120](https://github.com/Cristiano3120))
+- `FortniteReplayBuilder`: mark the replay owner when `RecorderId` arrives after player states (by [Cristiano3120](https://github.com/Cristiano3120))
+- `NetFieldParser`: add a subgroup only when its parent group exists (by [Cristiano3120](https://github.com/Cristiano3120))
+
+## [3.1.0] - 2026-09-13
+### Changed
+- Improve parsing performance and reduce allocations:
+  - Reduced heap allocations by ~34%–38% (~70–135 MB saved per replay) via zero-copy packet reading, bunch buffer reuse, and lazy vector serialization.
+  - Reduced parse times by ~10%–25% using `BinaryPrimitives`, 64-bit bit-shifting in `BitReader`, and direct NetGuid export group indexing.
+  - Decreased GC Gen 0 pressure by ~50%, significantly reducing GC pauses during replay parsing.
+
+## [3.0.5] - 2026-09-06
+### Changed
+- use pinned commit SHAs for GitHub actions
+
+## [3.0.4] - 2026-09-06
+### Changed
+- fix `RepMovement` (see [issue 76](https://github.com/Shiqan/FortniteReplayDecompressor/issues/76)) (by [KerbalSpace](https://github.com/KerbalSpace))
+
+## [3.0.3] - 2026-09-06
+### Changed
+- prevent infinite loop when a bunch overflows (see [issue 74](https://github.com/Shiqan/FortniteReplayDecompressor/issues/74)) (by [tylerrichey](https://github.com/tylerrichey))
+
+## [3.0.2] - 2026-09-06
+### Changed
+- fix infinite loop in `ProcessBunch` (see [issue 74](https://github.com/Shiqan/FortniteReplayDecompressor/issues/74)) (by [KerbalSpace](https://github.com/KerbalSpace))
+
+## [3.0.1] - 2026-05-16
+### Changed
+- fix `ReadNetFieldExports` (see [issue 72](https://github.com/Shiqan/FortniteReplayDecompressor/issues/72))
+
+## [3.0.0] - 2026-04-04
+### Changed
+- support .net10
+
+## [2.4.0] - 2024-11-13
+### Changed
+- support .net9
+- fix parsing of `FRepMovement` with `RepMoveOptionalAcceleration` (thanks @Zaid)
+
+### Removed
+- support .net6
+
+## [2.3.1] - 2024-11-08
+### Changed
+- fix parsing of `FGameplayTag` with new `bUseDynamicReplication`
+
+## [2.3.0] - 2024-11-05
+### Changed
+- add support for Fortnite v32 (see [issue 58](https://github.com/Shiqan/FortniteReplayDecompressor/issues/58)) (by [SL-x-TnT](https://github.com/SL-x-TnT))
+
+## [2.2.2] - 2024-03-31
+### Changed
+- fix `ParseElimination` (see [issue 55](https://github.com/Shiqan/FortniteReplayDecompressor/issues/55))
+
+## [2.2.1] - 2024-03-09
+### Changed
+- fix possible infinite loop while parsing broken replays (by [diopolgg](https://github.com/diopolgg))
+
+## [2.2.0] - 2023-11-18
+### Changed
+- support .net8
+
+## [2.1.0] - 2023-09-10
+### Changed
+- support .net6
+
+## [2.0.8] - 2023-09-10
+### Changed
+- add support for Fortnite v26
+
+## [2.0.7] - 2023-09-10
+### Changed
+- add HISTORY_GAMESTATE_REPLCIATED_TIME_AS_DOUBLE (by [chrisai-dev](https://github.com/chrisai-dev))
+
+## [2.0.6] - 2023-06-10
+### Changed
+- adding support for Fortnite v25
+
+## [2.0.5] - 2022-12-04
+### Changed
+- support new network version
+
+## [2.0.4] - 2022-10-04
+### Changed
+- fix issue in Oodle decompress (by [SL-x-TnT](https://github.com/SL-x-TnT))
+
+## [2.0.3] - 2022-09-19
+### Changed
+- Fix new Large World Vectors in new Fortnite season (thanks to [bassner](https://github.com/bassner/) and [xNocken](https://github.com/xNocken/))
+
+## [2.0.2] - 2022-01-28
+### Changed
+- Fix for NetFieldGroups that uses handles
+
+## [2.0.1] - 2021-11-13
+### Changed
+- Fix issue where bActorIsOuter bit was read twice
+
+## [2.0.0] - 2021-02-11
+### Added
+- Additional information on Player Elim event (by [SL-x-TnT](https://github.com/SL-x-TnT))
+- PlayerNames on PlayerData (by [SL-x-TnT](https://github.com/SL-x-TnT) and [xNocken](https://github.com/xNocken/))
+
+### Changed
+- .Net 5.0
+- Performance improvements (by [razfriman](https://github.com/razfriman/) and [SL-x-TnT](https://github.com/SL-x-TnT))
+- IL delegates (by [SL-x-TnT](https://github.com/SL-x-TnT)))
+- Moved Unreal.Encryption dependency to FortniteReplayReader
+
+## [1.1.2] - 2020-08-09
+### Added
+- MatchEndTime to GameData
+
+### Changed
+- Small performance improvement by skipping already failed paths
+- Fix bug with random cosmetics
+
+
+## [1.1.1] - 2020-07-01
+### Added
+- Player locations on ParseMode.Full
+
+## [1.1.0] - 2020-06-12
+### Changed
+- Performance improvements
+- Add additional properties to PlayerData and TeamData
+
+## [1.0.4] - 2020-04-26
+### Changed
+- Number of kills wasnt updating properly
+
+## [1.0.3] - 2020-04-31
+### Changed
+- Nuget package dependencies
+
+## [1.0.2] - 2020-03-31
+### Changed
+- Nuget package dependencies
+
+## [1.0.1] - 2020-03-31
+### Changed
+- Winning Player Ids should be int
+
+## [1.0.0] - 2020-03-29
+### Added
+- Unreal: Full support for Unreal Engine 4 replay parsing, written in .net core 3.1 with support for both Windows and Linux.
+- Fortnite: Retrieve game data, player data, team data and some additional map information such as llama and supply drop locations.
+- Fortnite: Knocks, eliminations and revives available in killfeed.
+
+
+[Unreleased]: https://github.com/Shiqan/FortniteReplayDecompressor/branches
+[1.0.0]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/1.0.0
+[1.0.1]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/1.0.1
+[1.0.2]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/1.0.2
+[1.0.3]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/1.0.3
+[1.0.4]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/1.0.4
+[1.1.0]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/1.1.0
+[1.1.1]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/1.1.1
+[1.1.2]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/1.1.2
+[2.0.0]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.0.0
+[2.0.1]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.0.1
+[2.0.2]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.0.2
+[2.0.3]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.0.3
+[2.0.4]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.0.4
+[2.0.5]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.0.5
+[2.0.6]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.0.6
+[2.0.7]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.0.7
+[2.0.8]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.0.8
+[2.1.0]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.1.0
+[2.2.0]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.2.0
+[2.2.1]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.2.1
+[2.2.2]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.2.2
+[2.3.1]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.3.0
+[2.3.1]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.3.1
+[2.4.0]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/2.4.0
+[3.0.0]: https://github.com/Shiqan/FortniteReplayDecompressor/releases/tag/3.0.0
+
