@@ -27,10 +27,11 @@ const hostedSite = (outDir: string): Plugin => {
   const out = (file: string) => new URL(`./${outDir}/${file}`, import.meta.url)
   const meta = (key: 'name' | 'property', id: string, content: string): HtmlTagDescriptor =>
     ({ tag: 'meta', attrs: { [key]: id, content }, injectTo: 'head' })
+  const text = (value: string) => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;')
   const structured = [
     {
       '@context': 'https://schema.org', '@type': 'WebApplication', name: site.name, description: site.description,
-      ...(origin && { url: `${origin}/` }), applicationCategory: 'GameApplication', operatingSystem: 'Windows',
+      ...(origin && { url: `${origin}/` }), applicationCategory: 'UtilitiesApplication', operatingSystem: 'Windows',
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
     },
     {
@@ -43,7 +44,7 @@ const hostedSite = (outDir: string): Plugin => {
     apply: 'build',
     transformIndexHtml: html => ({
       html: html
-        .replace(/<title>[^<]*<\/title>/, () => `<title>${site.title}</title>`)
+        .replace(/<title>[^<]*<\/title>/, () => `<title>${text(site.title)}</title>`)
         .replaceAll(/\s*<meta (?:name="(?:description|twitter:card)"|property="og:[^"]*") [^>]*>/g, '')
         .replace('<div id="root"></div>', () => `<div id="root">${renderToStaticMarkup(createElement(StaticLanding))}</div>`),
       tags: [

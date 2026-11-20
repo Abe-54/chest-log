@@ -18,11 +18,11 @@ const set = (state: ImportState) => importStore.setState(() => state)
 const FILES_PER_WORKER = 20
 
 /**
- * Tells the page, before the app loads, that this browser has a library. The hosted build writes the front page
+ * Tells the page, before the app loads, whether this browser has a library. The hosted build writes the front page
  * copy into the HTML for search engines, and the mark keeps it from flashing at a returning visitor.
  */
 const LIBRARY_MARK = 'chest-log:library'
-const markLibrary = (present: boolean) => {
+export const markLibrary = (present: boolean) => {
   try {
     if (present) localStorage.setItem(LIBRARY_MARK, '1')
     else localStorage.removeItem(LIBRARY_MARK)
@@ -84,7 +84,6 @@ export async function importReplays(picked: File[]) {
     set({ phase: 'building', total: files.length, added: progress.added, failed: progress.failed })
     const built = await run({ type: 'build', timeZone }, () => undefined)
     if (built.type !== 'built') throw new Error('the library was not rebuilt')
-    markLibrary(true)
     set({ phase: 'done', added: progress.added, skipped, meta: built.meta, before, total: built.total })
   } catch (error) {
     set({ phase: 'error', message: error instanceof Error ? error.message : String(error) })
@@ -146,6 +145,5 @@ export async function droppedFiles(items: DataTransferItemList) {
 
 export async function forgetLibrary() {
   await clearLibrary()
-  markLibrary(false)
   set({ phase: 'idle' })
 }

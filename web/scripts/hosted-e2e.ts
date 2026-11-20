@@ -31,8 +31,7 @@ const check = (ok: boolean, label: string) => {
 async function importAll() {
   const started = Date.now()
   await page.locator('input[type=file][accept=".replay"]').setInputFiles(files.map(name => new URL(name, replayDir).pathname.slice(1)))
-  await page.waitForURL(site + '/', { timeout: 15 * 60 * 1000 })
-  await page.getByText(/chests cracked in/).waitFor()
+  await page.getByText(/chests cracked in/).waitFor({ timeout: 15 * 60 * 1000 })
   return (Date.now() - started) / 1000
 }
 
@@ -47,6 +46,8 @@ await page.goto(site + '/matches', { waitUntil: 'networkidle' })
 check(page.url() === site + '/', 'an empty browser lands on the front page')
 check(await page.getByRole('heading', { name: /How many chests have you opened in Fortnite/ }).count() === 1, 'the front page shows the headline once')
 check(await page.getByRole('button', { name: 'Choose your replay folder' }).isVisible(), 'the front page offers the replay folder picker')
+check(/Fortnite Chest Counter/.test(await page.title()), 'the title survives the app loading')
+check((await (await fetch(site + '/robots.txt')).text()).startsWith('User-agent: *'), 'robots.txt is served as a file')
 console.log(`first import of ${files.length} replays took ${(await importAll()).toFixed(1)} s`)
 if (shots) await page.screenshot({ path: `${shots}/hosted-celebrate.png` })
 
@@ -105,6 +106,7 @@ const after = (await page.evaluate(readLibrary) as Library).week.total
 check(after === stored.week.total, `importing the same files again changes nothing (${after} chests) and took ${again.toFixed(1)} s`)
 
 await page.reload({ waitUntil: 'networkidle' })
+check(await page.evaluate(() => 'library' in document.documentElement.dataset), 'a returning visitor skips the front page copy')
 check(await page.getByText(/chests cracked in/).isVisible(), 'the library survives a reload')
 check(errors.length === 0, `no page errors or failed requests${errors.length ? `: ${errors.slice(0, 3).join(' | ')}` : ''}`)
 await browser.close()
