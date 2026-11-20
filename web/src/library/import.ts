@@ -16,6 +16,20 @@ const set = (state: ImportState) => importStore.setState(() => state)
 
 /** The parser's memory only grows, so a big folder is split across fresh workers. */
 const FILES_PER_WORKER = 20
+
+/**
+ * Tells the page, before the app loads, whether this browser has a library. The hosted build writes the front page
+ * copy into the HTML for search engines, and the mark keeps it from flashing at a returning visitor.
+ */
+const LIBRARY_MARK = 'chest-log:library'
+export const markLibrary = (present: boolean) => {
+  try {
+    if (present) localStorage.setItem(LIBRARY_MARK, '1')
+    else localStorage.removeItem(LIBRARY_MARK)
+  } catch {
+    // Storage can be blocked. The only cost is the brief flash.
+  }
+}
 const isReplay = (file: File) => /\.replay$/i.test(file.name)
 
 /**
