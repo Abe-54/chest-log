@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { ArrowRight, Play } from 'lucide-react'
-import { clipsQuery, weekQuery } from '~/lib/queries'
+import { clipsQuery, hosted, weekQuery } from '~/lib/queries'
+import { flags } from '~/lib/flags'
+import { ImportPage } from '~/features/import/page'
 import { clock, dateTime, decimal, placeLabel, shortDate } from '~/lib/format'
 import { BarList, Columns, DayColumns, MatchColumns, Segmented } from '~/components/charts'
 import { activity } from '~/lib/activity'
@@ -14,8 +16,14 @@ import { cn } from '~/lib/cn'
 import type { MatchRow } from '~/data'
 
 export const Route = createFileRoute('/')({
-  component: WeekPage,
+  component: Home,
 })
+
+// A visitor to the public site has no library yet, so its front page is where they add their replays.
+function Home() {
+  const { data: week } = useQuery({ ...weekQuery, enabled: hosted })
+  return hosted && !week ? <ImportPage /> : <WeekPage />
+}
 
 function WeekPage() {
   const { data: week } = useSuspenseQuery(weekQuery)
@@ -53,10 +61,12 @@ function WeekPage() {
         {week.stubs > 0 && <p className="mt-2 text-xs text-dim">{week.stubs} partial recording not counted.</p>}
         <LiveMatch />
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link to="/wrapped" className="press inline-flex h-12 items-center gap-2 rounded-full bg-gold px-5 font-semibold text-ink hover:bg-bone">
-            <Play className="size-4" fill="currentColor" /> Play your Wrapped
-          </Link>
-          <Link to="/routes" className="press inline-flex h-12 items-center gap-2 rounded-full border border-line px-5 font-semibold hover:border-mist">
+          {flags.wrapped && (
+            <Link to="/wrapped" className="press inline-flex h-12 items-center gap-2 rounded-full bg-gold px-5 font-semibold text-ink hover:bg-bone">
+              <Play className="size-4" fill="currentColor" /> Play your Wrapped
+            </Link>
+          )}
+          <Link to="/routes" className={cn('press inline-flex h-12 items-center gap-2 rounded-full px-5 font-semibold', flags.wrapped ? 'border border-line hover:border-mist' : 'bg-gold text-ink hover:bg-bone')}>
             Plan a chest route <ArrowRight className="size-4" />
           </Link>
         </div>

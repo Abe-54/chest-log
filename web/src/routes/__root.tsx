@@ -3,6 +3,7 @@ import { useQuery, type QueryClient } from '@tanstack/react-query'
 import { Clapperboard, Gem, PartyPopper, Plus, Route as RouteIcon, Swords } from 'lucide-react'
 import { Toaster } from 'sonner'
 import { hosted, isMissing, weekQuery } from '~/lib/queries'
+import { flags } from '~/lib/flags'
 import { cn } from '~/lib/cn'
 import { LiveDot } from '~/components/live'
 
@@ -14,7 +15,7 @@ const everyTab = [
   { to: '/wrapped', label: 'Wrapped', icon: PartyPopper, exact: false },
 ] as const
 // Clips are this PC's own recordings, so a hosted library has no Clips page.
-const tabs = everyTab.filter(tab => !hosted || tab.to !== '/clips')
+const tabs = everyTab.filter(tab => (!hosted || tab.to !== '/clips') && (flags.wrapped || tab.to !== '/wrapped'))
 
 const library = (queryClient: QueryClient) => queryClient.ensureQueryData(weekQuery).catch(error => {
   if (hosted && isMissing(error)) return null
@@ -23,7 +24,8 @@ const library = (queryClient: QueryClient) => queryClient.ensureQueryData(weekQu
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ context, location }) => {
-    if (hosted && location.pathname !== '/import' && !(await library(context.queryClient))) throw redirect({ to: '/import' })
+    // Without a library the public site has one page, the front page, where a visitor adds replays.
+    if (hosted && location.pathname !== '/' && !(await library(context.queryClient))) throw redirect({ to: '/' })
   },
   loader: ({ context }) => library(context.queryClient),
   head: () => ({ meta: [{ title: 'Chest Log' }] }),

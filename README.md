@@ -30,6 +30,15 @@ node scripts/serve-hosted.mjs       # http://127.0.0.1:4180
 
 Vercel builds the same thing from `vercel.json`.
 
+The hosted build writes the front page copy, metadata and structured data into `index.html`, so search engines and
+link previews read it without running scripts. The copy is in `web/src/seo/content.ts`. The canonical address,
+share image and sitemap need the production host, which Vercel provides as `VERCEL_PROJECT_PRODUCTION_URL`.
+
+### Feature flags
+
+`web/src/lib/flags.ts` lists the build-time switches. A feature is on unless the build sets
+`VITE_FLAG_<NAME>=off`. `web/.env.hosted` turns Wrapped off for the public site; the local app keeps it.
+
 Rebuild the engine after changing anything under `extractor/` or `vendor/` (needs the .NET 10 SDK with the `wasm-tools` workload in `tools/dotnet`):
 
 ```bash

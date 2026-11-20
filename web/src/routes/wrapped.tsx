@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { animate } from 'motion'
 import { LazyMotion, domAnimation, m, type Variants } from 'motion/react'
@@ -9,6 +9,7 @@ import { clipsQuery, hosted, weekQuery } from '~/lib/queries'
 import { activity, type Activity } from '~/lib/activity'
 import { clock, decimal, placeLabel, shortDate } from '~/lib/format'
 import { shareLink } from '~/lib/share'
+import { flags } from '~/lib/flags'
 import { cn } from '~/lib/cn'
 
 const SLIDE_MS = 6500
@@ -26,6 +27,9 @@ interface Story { week: Week; when: Activity; clip?: Clip; paused: boolean; rest
 interface Slide { id: string; tone: Tone; title: string; ms?: number; body: ReactNode }
 
 export const Route = createFileRoute('/wrapped')({
+  beforeLoad: () => {
+    if (!flags.wrapped) throw redirect({ to: '/' })
+  },
   validateSearch: (raw: Record<string, unknown>): { s?: string } => ({ s: typeof raw.s === 'string' && raw.s ? raw.s : undefined }),
   loader: ({ context }) => context.queryClient.ensureQueryData(clipsQuery),
   head: () => ({ meta: [{ title: 'Wrapped · Chest Log' }] }),

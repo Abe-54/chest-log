@@ -36,8 +36,17 @@ async function importAll() {
   return (Date.now() - started) / 1000
 }
 
+// What a search engine or link preview reads, before any script runs.
+const html = await (await fetch(site + '/')).text()
+check(/<title>[^<]*Fortnite Chest Counter/.test(html), 'the page title names the Fortnite chest counter')
+check(/<h1[^>]*>How many chests have .*opened in Fortnite\?<\/h1>/.test(html), 'the headline is in the HTML without scripts')
+check(html.includes('Where are Fortnite replay files saved?') && html.includes('"@type":"FAQPage"'), 'the questions are in the HTML and in the structured data')
+check(!html.includes('Wrapped'), 'the HTML does not mention Wrapped')
+
 await page.goto(site + '/matches', { waitUntil: 'networkidle' })
-check(page.url() === site + '/import', 'an empty browser lands on the import screen')
+check(page.url() === site + '/', 'an empty browser lands on the front page')
+check(await page.getByRole('heading', { name: /How many chests have you opened in Fortnite/ }).count() === 1, 'the front page shows the headline once')
+check(await page.getByRole('button', { name: 'Choose your replay folder' }).isVisible(), 'the front page offers the replay folder picker')
 console.log(`first import of ${files.length} replays took ${(await importAll()).toFixed(1)} s`)
 if (shots) await page.screenshot({ path: `${shots}/hosted-celebrate.png` })
 
@@ -80,7 +89,10 @@ check(stored.meta.failed.length === 0, 'no replay failed to parse')
 
 await page.waitForTimeout(4500)
 if (shots) await page.screenshot({ path: `${shots}/hosted-home.png` })
-for (const path of ['/matches', `/matches/${stored.matches.at(-1)!.id}`, '/routes', '/wrapped']) {
+check(await page.getByRole('link', { name: /Wrapped/ }).count() === 0, 'no link leads to Wrapped')
+await page.goto(site + '/wrapped', { waitUntil: 'networkidle' })
+check(page.url() === site + '/', 'the Wrapped address goes back to the front page')
+for (const path of ['/matches', `/matches/${stored.matches.at(-1)!.id}`, '/routes']) {
   await page.goto(site + path, { waitUntil: 'networkidle' })
   check(page.url() === site + path && (await page.locator('#root').innerText()).trim().length > 0, `${path} opens`)
   if (shots) await page.screenshot({ path: `${shots}/hosted${path.replace(/\/matches\/.+/, '/match').replaceAll('/', '-')}.png` })

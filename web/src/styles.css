@@ -113,3 +113,6 @@
   from { transform: translateX(-100%); }
   to { transform: translateX(300%); }
 }
+
+/* The hosted page ships its front page copy as HTML. A browser that already has a library skips it. */
+html[data-library] [data-static-landing] { display: none; }
