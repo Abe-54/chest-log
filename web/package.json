@@ -10,7 +10,14 @@
     "typecheck": "tsc-rs --noEmit -p tsconfig.json",
     "test": "vitest run",
     "serve": "node server.mjs",
-    "lint": "oxlint src pipeline"
+    "lint": "oxlint src pipeline",
+    "build:hosted": "vite build --mode hosted && tsx site/build.ts",
+    "site": "tsx site/build.ts",
+    "site:serve": "tsx site/serve.ts",
+    "site:verify": "tsx site/verify.ts",
+    "site:og": "tsx site/og.ts",
+    "site:test": "tsx --test site/*.test.ts",
+    "site:typecheck": "tsc-rs --noEmit -p site/tsconfig.json"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
