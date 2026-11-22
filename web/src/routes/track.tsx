@@ -56,8 +56,10 @@ function TrackPage() {
     if (!canPickFolder) return folderInput.current?.click()
     const folder = await chooseFolder()
     if (!folder) return
-    const outcome = await importReplays(await filesIn(folder))
-    if (outcome) startWatching(folder)
+    const files = await filesIn(folder)
+    const outcome = await importReplays(files)
+    // A folder whose matches are all still recording has no finished match yet, but it is the right one to watch.
+    if (outcome || files.length > 0) startWatching(folder)
     await finish(outcome)
   }
   const fromInput = (input: HTMLInputElement) => {
@@ -120,15 +122,15 @@ function TrackPage() {
                   </>}
             </section>
             <section aria-labelledby="one-replay" className="rounded-2xl bg-ink p-5">
-              <h2 id="one-replay" className="display text-2xl">Add one replay</h2>
-              <p className="mt-2 text-sm text-mist">Drop a <code className="font-mono text-bone">.replay</code> file anywhere on this page, or choose one.</p>
+              <h2 id="one-replay" className="display text-2xl">Add a replay</h2>
+              <p className="mt-2 text-sm text-mist">Drop a <code className="font-mono text-bone">.replay</code> file anywhere on this page, or choose one. A few at once work too.</p>
               <button type="button" onClick={() => fileInput.current?.click()}
                 className="press mt-4 inline-flex h-12 items-center gap-2 rounded-full border border-line px-5 font-semibold hover:border-mist">
                 <FileUp className="size-4" aria-hidden /> Choose a replay
               </button>
             </section>
             <input ref={folderInput} type="file" hidden multiple {...{ webkitdirectory: '' }} onChange={event => fromInput(event.currentTarget)} />
-            <input ref={fileInput} type="file" hidden accept=".replay" onChange={event => fromInput(event.currentTarget)} />
+            <input ref={fileInput} type="file" hidden multiple accept=".replay" onChange={event => fromInput(event.currentTarget)} />
             {state.phase === 'error' && <p role="alert" className="rounded-xl bg-coral/15 px-4 py-3 text-sm text-coral sm:col-span-2">{state.message}</p>}
           </div>
         )}
