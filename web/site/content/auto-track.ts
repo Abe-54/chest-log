@@ -23,7 +23,8 @@ export const autoTrack: Page = {
       id: 'how',
       heading: 'How Auto-track works',
       html: steps([
-        { title: 'Pick the folder once', body: `Choose your Fortnite replay folder, ${pathCode(SITE.demosPath)}. Chrome and Edge remember it.` },
+        { title: 'Move the replay folder once', body: `Chrome and Edge do not let websites watch folders inside AppData, where Fortnite saves replays. Chest Log gives you two commands that move ${pathCode(SITE.demosPath)} out of AppData and leave a link in its place, so Fortnite keeps saving to the same path.` },
+        { title: 'Pick the moved folder', body: 'Choose it on the Auto-track page. Chrome and Edge remember it.' },
         { title: 'Leave the tab open', body: 'Keep the Chest Log tab open while you play. Every 30 seconds it checks the folder for new replay files.' },
         { title: 'Watch the count grow', body: 'New matches are read and added to your total. You do not import anything by hand.' },
       ]),
@@ -35,7 +36,7 @@ export const autoTrack: Page = {
 <li>Chrome or Edge on the PC where you play Fortnite.</li>
 <li>Replays turned on in Fortnite. ${link('/fortnite-replay-files/', 'How to turn them on')}.</li>
 <li>The Chest Log tab open.</li>
-</ul><p>The browser may ask you to allow access to the folder when you open the tab. That prompt comes from the browser, and Chest Log only asks for permission to read.</p>`,
+</ul><p>If you skip the move, Chrome says it "can't open this folder because it contains system files". Counting still works without it: choose the Demos folder after you play and Chest Log reads every replay in it.</p><p>The browser may ask you to allow access to the folder when you open the tab. That prompt comes from the browser, and Chest Log only asks for permission to read.</p>`,
     },
     {
       id: 'other-browsers',
