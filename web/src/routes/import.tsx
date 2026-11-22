@@ -67,7 +67,7 @@ function ImportPage() {
       <p className="mt-5 max-w-xl text-lg text-mist">
         {week
           ? `Your library has ${week.realMatches.toLocaleString()} matches. Pick your replay folder again and only the new ones are read.`
-          : 'Point this page at your Fortnite replays. You get your chest count, every match replayed on the map, your best drop spots and a Wrapped recap.'}
+          : 'Point this page at your Fortnite replays. You get your chest count and every match replayed on the map.'}
       </p>
 
       {busy

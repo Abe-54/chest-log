@@ -1,4 +1,4 @@
-import type { Island, Match, Planner, Week } from '~/data'
+import type { Match, Week } from '~/data'
 
 /**
  * A visitor's library lives in their browser's IndexedDB. `replays` caches the slow per-file parse, keyed by the
@@ -13,8 +13,6 @@ export interface LibraryMeta { replays: number; failed: { name: string; error: s
 
 interface Values {
   week: Week
-  planner: Planner
-  island: Island
   meta: LibraryMeta
   folder: FileSystemDirectoryHandle
 }
@@ -55,15 +53,13 @@ export const allReplays = async () => done<ReplayRecord[]>((await store('replays
 export const putReplay = async (record: ReplayRecord) => { await done((await store('replays', 'readwrite')).put(record)) }
 
 /** Swaps in a freshly built dataset in one transaction, so a reader never sees half of it. */
-export async function writeDataset(dataset: { week: Week; planner: Planner; island: Island; matches: Match[] }, meta: LibraryMeta) {
+export async function writeDataset(dataset: { week: Week; matches: Match[] }, meta: LibraryMeta) {
   const transaction = (await open()).transaction(['matches', 'kv'], 'readwrite')
   const matches = transaction.objectStore('matches')
   const kv = transaction.objectStore('kv')
   matches.clear()
   for (const match of dataset.matches) matches.put(match)
   kv.put(dataset.week, 'week')
-  kv.put(dataset.planner, 'planner')
-  kv.put(dataset.island, 'island')
   kv.put(meta, 'meta')
   await new Promise<void>((resolve, reject) => {
     transaction.oncomplete = () => resolve()
