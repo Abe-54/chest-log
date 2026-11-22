@@ -83,7 +83,7 @@ export async function validateOutput(outDir: string, pages: readonly Page[]): Pr
     const allowed = 1 + (page.script ? 1 : 0)
     if (scripts !== allowed) errors.push(`${at}: found ${scripts} inline scripts, expected ${allowed}.`)
     if (!html.includes(SITE.disclaimer)) errors.push(`${at}: the disclaimer is missing from the footer.`)
-    if (page.faq.length > 0 && (html.match(/<details>/g) ?? []).length !== page.faq.length) errors.push(`${at}: FAQ count differs from the details elements.`)
+    if (page.faq.length > 0 && (html.match(/<details class="qa"/g) ?? []).length !== page.faq.length) errors.push(`${at}: FAQ count differs from the details elements.`)
   }
   for (const required of ['sitemap.xml', 'robots.txt', '404.html', 'og.png', 'logo.png', 'favicon.svg']) {
     if (!existsSync(join(outDir, required))) errors.push(`${required} was not written.`)
