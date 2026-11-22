@@ -6,12 +6,6 @@ import { cn } from '~/lib/cn'
 
 type Phase = Exclude<LiveStatus['phase'], 'off'>
 
-const dot: Record<Phase, string> = {
-  watching: 'bg-kelp',
-  recording: 'bg-coral motion-safe:animate-pulse',
-  counting: 'bg-gold motion-safe:animate-pulse',
-  error: 'bg-coral',
-}
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches
 
 function useLive() {
@@ -19,18 +13,41 @@ function useLive() {
   return status && status.phase !== 'off' ? status : null
 }
 
-/** Header status: a LIVE badge during a match, otherwise a dot. */
+const pillDot: Record<Phase | 'idle', string> = {
+  watching: 'bg-live shadow-live motion-safe:animate-[live-ping_1.6s_ease-out_infinite]',
+  recording: 'bg-coral motion-safe:animate-pulse',
+  counting: 'bg-gold motion-safe:animate-pulse',
+  error: 'bg-coral',
+  idle: 'bg-dim',
+}
+
+export function StatusPill({ phase, word, detail, to }: { phase: Phase | 'idle'; word: string; detail?: string; to?: '/track' }) {
+  const body = (
+    <>
+      <span aria-hidden className={cn('size-[9px] shrink-0 rounded-full', pillDot[phase])} />
+      <span>{word}{detail && <span className="hidden lg:inline"> {detail}</span>}</span>
+    </>
+  )
+  const style = cn('flex h-9 items-center gap-2 rounded-pill border bg-ink-2 px-3.5 text-sm font-semibold whitespace-nowrap text-mist',
+    phase === 'watching' ? 'border-live-line' : phase === 'idle' ? 'border-line' : 'border-line-strong')
+  return to
+    ? <Link to={to} className={cn(style, 'press hover:text-bone')}>{body}</Link>
+    : <span role="status" className={style}>{body}</span>
+}
+
+const localWords: Record<Phase, [string, string]> = {
+  watching: ['Watching', 'for your next match'],
+  recording: ['Live', '· you are in a match'],
+  counting: ['Counting', 'your last match'],
+  error: ['Couldn’t count', 'your last match'],
+}
+
+/** The local app's tracker, as a header pill. Nothing shows until its server answers. */
 export function LiveDot() {
   const status = useLive()
-  if (status?.phase === 'recording') {
-    return (
-      <Link to="/" aria-label="Live: you are in a match"
-        className="press flex items-center gap-1.5 rounded-full bg-coral/15 px-2.5 py-1 text-[11px] font-bold tracking-wider text-coral uppercase">
-        <span aria-hidden className="size-1.5 rounded-full bg-coral motion-safe:animate-pulse" />Live
-      </Link>
-    )
-  }
-  return <span aria-hidden className={cn('size-2 rounded-full', dot[status?.phase ?? 'watching'])} />
+  if (!status) return null
+  const [word, detail] = localWords[status.phase]
+  return <StatusPill phase={status.phase} word={word} detail={detail} />
 }
 
 /** The match you are in, or the one being counted, on the home page; a quiet status line between matches. */
@@ -41,7 +58,7 @@ export function LiveMatch() {
   if (phase !== 'recording' && phase !== 'counting') {
     return (
       <p role="status" title={status.error ?? undefined} className="mt-5 flex max-w-md items-start gap-2.5 text-sm text-mist">
-        <span aria-hidden className={cn('mt-1.5 size-2 shrink-0 rounded-full', dot[phase])} />
+        <span aria-hidden className={cn('mt-1.5 size-2 shrink-0 rounded-full', pillDot[phase])} />
         {phase === 'error' ? 'Couldn’t count your last match. It will try again after your next one.' : 'Watching for your next match. Its chests land here seconds after you leave it.'}
       </p>
     )
@@ -49,7 +66,7 @@ export function LiveMatch() {
   const live = phase === 'recording'
   return (
     <section role="status" aria-label={live ? 'Match in progress' : 'Counting your match'}
-      className="relative mt-6 max-w-md overflow-hidden rounded-2xl border border-line/60 bg-ink-2 motion-safe:animate-[caption-in_300ms_var(--ease-out)]">
+      className="relative mt-6 max-w-md overflow-hidden rounded-panel border border-line bg-ink-2 motion-safe:animate-[caption-in_300ms_var(--ease-out)]">
       <div className="flex items-center gap-2.5 px-4 py-3.5">
         {live
           ? <span className="flex items-center gap-1.5 rounded-full bg-coral px-2 py-0.5 text-[11px] font-extrabold tracking-wider text-ink uppercase">
@@ -59,7 +76,7 @@ export function LiveMatch() {
         <span className="text-sm">{live ? `In a match, ${status.match?.minutes ?? 0} min in` : 'Counting your chests from the replay'}</span>
       </div>
       {live
-        ? <p className="border-t border-line/60 px-4 py-2.5 text-xs text-dim">Your chests count from the replay the moment you leave the match.</p>
+        ? <p className="border-t border-line-soft px-4 py-2.5 text-xs text-dim">Your chests count from the replay the moment you leave the match.</p>
         : <div aria-hidden className="h-1 overflow-hidden bg-ink-3"><div className="h-full w-1/3 bg-gold motion-safe:animate-[scan_1.1s_var(--ease-in-out)_infinite]" /></div>}
     </section>
   )
@@ -119,7 +136,7 @@ export function HeroTotal({ total }: { total: number }) {
         element.animate([{ transform: 'scale(1.035)' }, { transform: 'scale(1)' }], { duration: 120, easing: 'ease-out' })
       }
       if (progress < 1) { frame = requestAnimationFrame(tick); return }
-      element.animate([{ transform: 'scale(1.12)', textShadow: '0 0 48px oklch(0.83 0.15 80 / 0.9)' }, { transform: 'scale(1)', textShadow: '0 0 0 transparent' }],
+      element.animate([{ transform: 'scale(1.12)', textShadow: '0 0 48px rgb(255 194 61 / 0.9)' }, { transform: 'scale(1)', textShadow: '0 0 0 transparent' }],
         { duration: 700, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' })
       setBurst(count => count + 1)
       setBadge({ gained, leaving: true, label })
@@ -129,13 +146,37 @@ export function HeroTotal({ total }: { total: number }) {
   }, [party, total])
   useEffect(() => () => stop.current(), [])
 
+  // Any other change of total counts up from what was on screen: from zero on arrival, between the two when the toggle flips.
+  const shown = useRef(0)
+  useLayoutEffect(() => {
+    const from = shown.current
+    const celebrating = playing.current === party?.id && party?.to === total
+    if (celebrating || from === total || reducedMotion()) {
+      shown.current = total
+      return
+    }
+    const element = number.current!
+    const duration = from === 0 ? 900 : 600
+    const begin = performance.now()
+    let frame = 0
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - begin) / duration)
+      shown.current = Math.round(from + (total - from) * (1 - (1 - progress) ** 3))
+      element.textContent = shown.current.toLocaleString()
+      if (progress < 1) frame = requestAnimationFrame(tick)
+    }
+    element.textContent = from.toLocaleString()
+    frame = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(frame)
+  }, [total])
+
   return (
     <span className="relative inline-block">
       {/* Keyed so a new total always gets a fresh text node; the count-up writes to the DOM directly. */}
       <span key={total} ref={number} className="inline-block origin-left">{total.toLocaleString()}</span>
       {badge && (
         <span aria-live="polite"
-          className={cn('pointer-events-none absolute top-[6%] left-full ml-3 flex -rotate-3 flex-col items-start gap-1 rounded-xl bg-gold px-3 pt-2 pb-1.5 text-ink shadow-[0_0_40px_oklch(0.83_0.15_80/0.55)] sm:ml-5 sm:px-4',
+          className={cn('pointer-events-none absolute top-[6%] left-full ml-3 flex -rotate-3 flex-col items-start gap-1 rounded-card bg-gold px-3 pt-2 pb-1.5 text-ink shadow-glow-gold sm:ml-5 sm:px-4',
             badge.leaving ? '[animation:chest-out_600ms_var(--ease-out)_forwards]' : '[animation:chest-pop_650ms_cubic-bezier(0.34,1.56,0.64,1)_both]')}>
           <span ref={left} className="display num text-5xl leading-none sm:text-7xl">+{badge.gained}</span>
           <span className="text-[11px] leading-none font-extrabold tracking-wider whitespace-nowrap uppercase">{badge.label}</span>

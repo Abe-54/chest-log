@@ -29,7 +29,7 @@ function ClipsPage() {
   const set = (patch: Search) => navigate({ search: previous => ({ ...previous, ...patch }), replace: true })
 
   return (
-    <main className="mx-auto max-w-7xl px-4 pt-8">
+    <main className="page pt-8">
       <h1 className="display text-5xl sm:text-6xl">Clips</h1>
       <p className="mt-2 max-w-xl text-mist">{data.clips.length} highlights your recorder saved, each lined up with its replay so you can jump to the same moment on the map.</p>
 
@@ -49,7 +49,7 @@ function ClipsPage() {
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {clips.map(clip => (
               <li key={clip.id}>
-                <Link to="/clips/$clipId" params={{ clipId: clip.id }} className="group block overflow-hidden rounded-xl bg-ink-2 hover:bg-ink-3">
+                <Link to="/clips/$clipId" params={{ clipId: clip.id }} className="group block overflow-hidden rounded-card bg-ink-2 hover:bg-ink-3">
                   <span className="relative block">
                     <img src={clip.poster} alt="" loading="lazy" decoding="async" width={1720} height={720} className="aspect-[43/18] w-full object-cover" />
                     <span className="num absolute right-2 bottom-2 rounded-md bg-ink/80 px-1.5 py-0.5 text-xs">{clock(clip.duration)}</span>
@@ -72,7 +72,7 @@ function ClipsPage() {
 function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button type="button" aria-pressed={active} onClick={onClick}
-      className="press flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-line px-3.5 text-sm text-mist aria-pressed:border-transparent aria-pressed:bg-bone aria-pressed:text-ink">
+      className="press flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-line px-3.5 text-sm text-mist aria-pressed:border-line-strong aria-pressed:bg-ink-3 aria-pressed:text-bone">
       {children}
     </button>
   )

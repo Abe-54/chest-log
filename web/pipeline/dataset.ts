@@ -1,15 +1,13 @@
-import type { ChestRegistry, ContainerSearch, Position, ReplayIndex, ReplayMatch, TrackSample } from '../../data/types'
+import type { ContainerSearch, Position, ReplayIndex, ReplayMatch, TrackSample } from '../../data/types'
 import type * as Out from '../src/data'
 import type { Calibration, Point } from './domain/model'
 import type { ClipIndex } from './domain/clips'
-import { eventCaption, standoutClip } from './domain/clips'
-import { budgets, minimumLandings } from './domain/planner'
+import { eventCaption } from './domain/clips'
 import { atTime, distance, isChest, itemLabel, mapBounds, searchPosition, trackPaths } from './domain/replay'
-import { deriveWeek, recapStats } from './domain/stats'
+import { deriveWeek, weekStats } from './domain/stats'
 
 export interface DatasetInput {
   index: ReplayIndex
-  registry: ChestRegistry
   calibration: Calibration
   /** One per index row without an error. */
   replays: ReplayMatch[]
@@ -20,25 +18,21 @@ export interface DatasetInput {
 
 export interface Dataset {
   week: Out.Week
-  planner: Out.Planner
-  island: Out.Island
   clips: Out.Clips
   matches: Out.Match[]
 }
 
 /** Everything the app shows, derived from the extractor's output. Runs in Node for the local build and in the browser for the hosted one. */
-export function buildDataset({ index, registry, calibration, replays, clipIndex = { clips: [], alignmentToleranceSeconds: 0 }, generatedAt }: DatasetInput): Dataset {
-  const { summary, layers } = deriveWeek(index, replays, registry, calibration)
+export function buildDataset({ index, calibration, replays, clipIndex = { clips: [], alignmentToleranceSeconds: 0 }, generatedAt }: DatasetInput): Dataset {
+  const summary = deriveWeek(index, replays, calibration)
   if (summary.total !== index.week.ownerChests) throw Error(`chest total ${summary.total} disagrees with index ${index.week.ownerChests}`)
-  const recap = recapStats(summary)
+  const stats = weekStats(summary)
   const player = summary.player
 
   const r1 = (value: number) => Math.round(value * 10) / 10
   const r2 = (value: number) => Math.round(value * 100) / 100
   const px = ([x, y]: Point | Position): Out.Px => [r1(x * calibration.pxPerUu + calibration.offsetX), r1(y * calibration.pxPerUu + calibration.offsetY)]
   const pxOrNull = (point: Position | null): Out.Px | null => point ? px(point) : null
-  const coarse = (point: Point | Position): Out.Px => px(point).map(Math.round) as Out.Px
-  const paths = (lines: Point[][]) => lines.filter(line => line.length > 1).map(line => line.map(coarse))
   const radius = (value: number) => r1(value * calibration.pxPerUu)
 
   function track(name: string, samples: TrackSample[]): Out.Track {
@@ -157,7 +151,6 @@ export function buildDataset({ index, registry, calibration, replays, clipIndex 
   }
 
   const real = summary.matches.filter(row => !row.stub && !row.error)
-  const standout = standoutClip(clipIndex.clips)
   const realIds = new Set(real.map(row => row.id))
   const squadChests = replays.filter(match => realIds.has(match.meta.id)).flatMap(match => match.searches.filter(isChest))
   const tally = (role: 'owner' | 'teammate', broken: boolean) => squadChests.filter(search => search.role === role && search.broken === broken).length
@@ -174,11 +167,10 @@ export function buildDataset({ index, registry, calibration, replays, clipIndex 
     wins: summary.wins,
     topFive: summary.topFive,
     pace: summary.pace === null ? null : r2(summary.pace),
-    aliveSeconds: Math.round(summary.alive),
     distanceKm: r1(summary.distanceKm),
-    mapCrossings: r1(recap.mapCrossings),
+    mapCrossings: r1(stats.mapCrossings),
     firstChestMedian: summary.firstChestMedian === null ? null : r1(summary.firstChestMedian),
-    bestOpening: recap.bestOpening,
+    bestOpening: stats.bestOpening,
     ammoBoxes: index.week.otherOwnerContainers.ammo_box ?? 0,
     otherContainers: index.week.otherOwnerContainers.other_container ?? 0,
     confirmedShare: summary.total ? r2(summary.confirmedPawn / summary.total) : 0,
@@ -201,62 +193,10 @@ export function buildDataset({ index, registry, calibration, replays, clipIndex 
     })),
     chestTimes: summary.chestWallTimes,
     loot: summary.loot.slice(0, 12).map(entry => ({ label: itemLabel(entry.label), count: entry.count })),
-    rarity: recap.rarity,
-    rarest: recap.rarest.slice(0, 5).map(entry => ({ label: itemLabel(entry.label), count: entry.count })),
-    kinds: summary.kinds.map(entry => ({ label: itemLabel(entry.label), count: entry.count })),
-    confidence: summary.confidence,
-    crew: recap.crew,
-    drops: recap.drops,
-    finishes: recap.finishes,
-    persona: recap.persona,
-    bestTrail: summary.bestTrail ? { trail: paths(summary.bestTrail.trail), chests: summary.bestTrail.points.map(px) } : null,
+    rarity: stats.rarity,
+    drops: stats.drops,
+    finishes: stats.finishes,
     clipCount: clipIndex.clips.length,
-    standoutClipId: standout?.id ?? null,
-  }
-
-  const best = (run: NonNullable<(typeof summary.zones)[number]['windows'][number]['best']>): Out.BestRun => ({
-    matchId: run.matchId, landedAt: r2(run.landedAt), start: px(run.start), trail: paths(run.trail),
-    chests: run.points.map(px), count: run.count, lastChest: run.lastChest === null ? null : r1(run.lastChest),
-  })
-  const suggestion = (route: NonNullable<(typeof summary.zones)[number]['windows'][number]['suggested']>): Out.Suggestion => ({
-    start: px(route.start),
-    stops: route.stops.map(stop => ({ id: stop.id, p: px(stop.position), appeared: stop.appeared, mine: stop.ownerSearches })),
-    seconds: Math.round(route.seconds), metres: Math.round(route.distanceMetres), expected: r1(route.expectedChests),
-  })
-  const drops: Out.Drop[] = summary.zones.map(zone => ({
-    id: zone.id, name: zone.name, center: px(zone.center), landings: zone.matches,
-    pace: zone.pace === null ? null : r2(zone.pace), placement: zone.placement === null ? null : r1(zone.placement),
-    lowSample: zone.matches < minimumLandings,
-    windows: zone.windows.map(window => ({
-      budget: window.budget, average: window.average === null ? null : r1(window.average),
-      suggested: window.suggested && suggestion(window.suggested), best: window.best && best(window.best),
-    })),
-  }))
-  const dense = summary.denseArea
-  const planner: Out.Planner = {
-    budgets: [...budgets],
-    minimumLandings,
-    drops,
-    hotspot: dense ? {
-      count: dense.count, radiusPx: radius(dense.radiusMetres * 100),
-      drop: {
-        id: dense.zone.id, name: dense.zone.name, center: px(dense.zone.center), landings: 0, pace: null, placement: null, lowSample: true,
-        windows: dense.zone.windows.map(window => ({ budget: window.budget, average: null, best: null, suggested: window.suggested && suggestion(window.suggested) })),
-      },
-    } : null,
-    timing: {
-      speed: summary.routeTiming.speed === null ? null : r2(summary.routeTiming.speed),
-      openSeconds: summary.routeTiming.openSeconds === null ? null : r2(summary.routeTiming.openSeconds),
-      recordings: summary.routeTiming.recordings,
-    },
-    pois: calibration.pois.map(poi => ({ name: poi.name, p: px([poi.x, poi.y]) })),
-  }
-
-  const island: Out.Island = {
-    trails: layers.trails.flatMap(paths),
-    myChests: layers.ownerChests.map(px),
-    sites: layers.chests.map(chest => [...px(chest.position), chest.matchesAppeared, chest.ownerSearches] as [number, number, number, number]),
-    landings: layers.landings.map(px),
   }
 
   const clips: Out.Clips = {
@@ -273,5 +213,5 @@ export function buildDataset({ index, registry, calibration, replays, clipIndex 
     })),
   }
 
-  return { week, planner, island, clips, matches: replays.map(matchPack) }
+  return { week, clips, matches: replays.map(matchPack) }
 }

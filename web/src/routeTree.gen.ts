@@ -11,8 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ImportRouteImport } from './routes/import'
-import { Route as RoutesRouteImport } from './routes/routes'
-import { Route as WrappedRouteImport } from './routes/wrapped'
+import { Route as TrackRouteImport } from './routes/track'
 import { Route as ClipsIndexRouteImport } from './routes/clips.index'
 import { Route as ClipsClipIdRouteImport } from './routes/clips.$clipId'
 import { Route as MatchesIndexRouteImport } from './routes/matches.index'
@@ -28,14 +27,9 @@ const ImportRoute = ImportRouteImport.update({
   path: '/import',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RoutesRoute = RoutesRouteImport.update({
-  id: '/routes',
-  path: '/routes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const WrappedRoute = WrappedRouteImport.update({
-  id: '/wrapped',
-  path: '/wrapped',
+const TrackRoute = TrackRouteImport.update({
+  id: '/track',
+  path: '/track',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClipsIndexRoute = ClipsIndexRouteImport.update({
@@ -62,8 +56,7 @@ const MatchesMatchIdRoute = MatchesMatchIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/import': typeof ImportRoute
-  '/routes': typeof RoutesRoute
-  '/wrapped': typeof WrappedRoute
+  '/track': typeof TrackRoute
   '/clips/$clipId': typeof ClipsClipIdRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/clips/': typeof ClipsIndexRoute
@@ -72,8 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/import': typeof ImportRoute
-  '/routes': typeof RoutesRoute
-  '/wrapped': typeof WrappedRoute
+  '/track': typeof TrackRoute
   '/clips/$clipId': typeof ClipsClipIdRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/clips': typeof ClipsIndexRoute
@@ -83,8 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/import': typeof ImportRoute
-  '/routes': typeof RoutesRoute
-  '/wrapped': typeof WrappedRoute
+  '/track': typeof TrackRoute
   '/clips/$clipId': typeof ClipsClipIdRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/clips/': typeof ClipsIndexRoute
@@ -95,8 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/import'
-    | '/routes'
-    | '/wrapped'
+    | '/track'
     | '/clips/$clipId'
     | '/matches/$matchId'
     | '/clips/'
@@ -105,8 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/import'
-    | '/routes'
-    | '/wrapped'
+    | '/track'
     | '/clips/$clipId'
     | '/matches/$matchId'
     | '/clips'
@@ -115,8 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/import'
-    | '/routes'
-    | '/wrapped'
+    | '/track'
     | '/clips/$clipId'
     | '/matches/$matchId'
     | '/clips/'
@@ -126,8 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ImportRoute: typeof ImportRoute
-  RoutesRoute: typeof RoutesRoute
-  WrappedRoute: typeof WrappedRoute
+  TrackRoute: typeof TrackRoute
   ClipsClipIdRoute: typeof ClipsClipIdRoute
   MatchesMatchIdRoute: typeof MatchesMatchIdRoute
   ClipsIndexRoute: typeof ClipsIndexRoute
@@ -150,18 +137,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/routes': {
-      id: '/routes'
-      path: '/routes'
-      fullPath: '/routes'
-      preLoaderRoute: typeof RoutesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/wrapped': {
-      id: '/wrapped'
-      path: '/wrapped'
-      fullPath: '/wrapped'
-      preLoaderRoute: typeof WrappedRouteImport
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clips/': {
@@ -198,8 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ImportRoute: ImportRoute,
-  RoutesRoute: RoutesRoute,
-  WrappedRoute: WrappedRoute,
+  TrackRoute: TrackRoute,
   ClipsClipIdRoute: ClipsClipIdRoute,
   MatchesMatchIdRoute: MatchesMatchIdRoute,
   ClipsIndexRoute: ClipsIndexRoute,

@@ -1,6 +1,6 @@
 # Personal data: replays, parsed matches (with other players' names), video clips.
-replays/
-clips/
+/replays/
+/clips/
 data/*
 !data/types.ts
 web/public/data/
@@ -31,3 +31,4 @@ overlay/
 
 .vercel
 .env.local
+.env*

@@ -1,4 +1,5 @@
 import type { Actor, EventKind, Match, MatchEvent, Px, StormFrame, Track } from '~/data'
+import { clock } from '../../lib/format'
 import { rgb, squadColors, type Rgb } from '../map/palette'
 
 export interface Member { name: string; you: boolean; color: Rgb; track: Track | null }
@@ -19,14 +20,16 @@ export const defaultTracked = (members: Member[]) => members.filter(member => me
 
 export const layerKeys = ['mine', 'team', 'others', 'containers', 'combat', 'storm', 'bus'] as const
 export type LayerKey = typeof layerKeys[number]
-export const layerInfo: Record<LayerKey, { label: string; color: Rgb }> = {
-  mine: { label: 'My chests', color: rgb.gold },
-  team: { label: 'Squad', color: rgb.kelp },
-  others: { label: 'Other chests', color: rgb.coral },
-  containers: { label: 'Ammo & other', color: rgb.mist },
-  combat: { label: 'Fights', color: rgb.coral },
-  storm: { label: 'Storm', color: rgb.storm },
-  bus: { label: 'Bus', color: rgb.bone },
+/** How each layer draws in its chip and on the scrubber: the glyph shape and its color. */
+export type LayerGlyph = 'diamond' | 'dot' | 'ring'
+export const layerInfo: Record<LayerKey, { label: string; color: Rgb; glyph: LayerGlyph }> = {
+  mine: { label: 'My chests', color: rgb.gold, glyph: 'diamond' },
+  team: { label: 'Squad', color: rgb.kelp, glyph: 'dot' },
+  others: { label: 'Other chests', color: rgb.coral, glyph: 'dot' },
+  containers: { label: 'Ammo & other', color: rgb.mist, glyph: 'dot' },
+  combat: { label: 'Fights', color: rgb.coral, glyph: 'diamond' },
+  storm: { label: 'Storm', color: rgb.storm, glyph: 'ring' },
+  bus: { label: 'Bus', color: rgb.bone, glyph: 'dot' },
 }
 
 const containerKinds = new Set<EventKind>(['chest', 'rare_chest', 'ammo_box', 'container'])
@@ -99,4 +102,16 @@ export function stormAt(frames: StormFrame[], time: number): Circle[] {
 
 export function chestTimes(match: Match) {
   return match.events.filter(isMyChest).map(event => event.t)
+}
+
+/** The storm phase at a time, for the map's zone tag: which zone, and how long until it starts or finishes closing. */
+export function stormTag(frames: StormFrame[], time: number): string | null {
+  const index = frames.findLastIndex(frame => frame.t <= time)
+  if (index < 0) return null
+  const { shrinkStart, shrinkEnd } = frames[index]
+  const zone = `Zone ${index + 1}`
+  if (shrinkStart === null || shrinkEnd === null) return zone
+  if (time < shrinkStart) return `${zone} closes in ${clock(shrinkStart - time)}`
+  if (time < shrinkEnd) return `${zone} closing · ${clock(shrinkEnd - time)}`
+  return `${zone} closed`
 }
