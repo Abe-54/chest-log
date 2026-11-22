@@ -54,7 +54,7 @@ export const home: Page = {
     {
       id: 'how-it-works',
       heading: 'How it works',
-      aside: `<p>Fortnite already records every match. Chest Log reads those replays inside your browser tab.</p>`,
+      aside: `<p>With replays turned on, Fortnite records every match. Chest Log reads those replays inside your browser tab.</p>`,
       html: lootSteps([
         { title: 'Pick your Demos folder', body: `It lives at <code>${esc(SITE.demosPath)}</code>. Or drop in a single .replay file.` },
         { title: 'Your browser reads them', body: 'Every chest you or your squad opened or broke gets counted. The files never leave your computer.' },
