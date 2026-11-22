@@ -18,6 +18,9 @@ export const plainText = (html: string) =>
 export const longDate = (iso: IsoDate) =>
   new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`))
 
+export const shortDate = (iso: IsoDate) =>
+  new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`))
+
 export const pathCode = (path: string) => `<code>${esc(path).replaceAll('\\', '\\<wbr>')}</code>`
 
 export const link = (href: string, text: string) => `<a href="${esc(href)}">${text}</a>`

@@ -5,7 +5,18 @@ export type Slug = string
 
 export type Faq = { q: string; a: string }
 
-export type Section = { id: string; heading: string; html: string }
+export type Section = {
+  id: string
+  heading: string
+  html: string
+  /** Short caps line above the heading. */
+  eyebrow?: string
+  /** HTML set beside the heading on wide screens. */
+  aside?: string
+}
+
+/** The home page hero. The h1 ends with `accent`, which is drawn in gold. */
+export type Hero = { eyebrow: string; accent: string; note: string }
 
 export type Cta = { label: string; href: string; kind: 'primary' | 'secondary' }
 
@@ -25,6 +36,7 @@ export type Page = {
   /** Opening paragraph, HTML. */
   lede: string
   ctas?: Cta[]
+  hero?: Hero
   published: IsoDate
   updated: IsoDate
   /** Slugs of the pages between home and this one. Empty while the site is one level deep. */

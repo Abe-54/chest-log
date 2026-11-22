@@ -19,8 +19,10 @@ The indexable pages for Chest Log. They are plain HTML and one CSS file, built a
 | `template.ts`, `jsonld.ts` | The one HTML template and the structured data. |
 | `validate.ts` | Rules the build enforces. Title and description length, links, one h1, JSON-LD, prose. |
 | `site.css` | Styles. The token block at the top is the only place with colors, fonts and radii. |
-| `build.ts` | Writes pages, `sitemap.xml`, `robots.txt`, `404.html`, hashed CSS and fonts. |
-| `og.ts` | Renders `assets/og.png` and `assets/logo.png`. Reads the tokens from `site.css`. |
+| `fonts.ts`, `assets/fonts/` | The self-hosted font faces (Barlow Condensed, Barlow, JetBrains Mono latin subsets, SIL OFL) and which ones are preloaded. |
+| `toc.js` | The only shared script. It marks the current section in the article contents list. Pages work without it. |
+| `build.ts` | Writes pages, `sitemap.xml`, `robots.txt`, `404.html`, hashed CSS, fonts and `toc.js`. |
+| `og.ts` | Renders `assets/og.png` and `assets/logo.png` with `site.css` and the landing page's island art. |
 | `serve.ts`, `verify.ts` | A local server that routes like `vercel.json` and a Playwright check of every page. |
 
 ## Commands
@@ -42,7 +44,7 @@ Add `--app` to `site:verify` once the app build lands under `/app/`. It then req
 
 ## Retheming
 
-Replace the `:root` block at the top of `site.css`. Then run `npm run site:og` to redraw the share image. Fonts are loaded in the `@font-face` rules below the block, and `build.ts` copies the two woff2 files from `@fontsource-variable`.
+Replace the `:root` block at the top of `site.css`. Then run `npm run site:og` to redraw the share image. The font faces live in `fonts.ts`, and `build.ts` turns them into `@font-face` rules with hashed file names. Faces use `font-display: optional`, and the ones above the fold are preloaded, so a late font never shifts the layout.
 
 ## Adding a page
 
