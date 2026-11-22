@@ -86,7 +86,7 @@ export const oddsPage: Page = {
     {
       id: 'by-count',
       heading: 'Chance by number of chests',
-      html: `<p>These rows use the same formula as the calculator, for normal matches only.</p>${table({
+      html: `<p>These rows use the same formula as the calculator, for normal matches only.</p><pre class="formula" tabindex="0"><code>odds = 1 - (1 - 1/${calc.formatCount(psa.oneIn)}) ^ chests</code></pre>${table({
         caption: 'Chance of at least one reward by chests opened',
         head: ['Chests opened', ...headline.map(entry => esc(entry.name))],
         numeric: [1, 2, 3],

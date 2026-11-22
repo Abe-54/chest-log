@@ -1,20 +1,17 @@
 import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
-import { createRequire } from 'node:module'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { FONTS, fontFaceCss, fontPath } from './fonts.ts'
 import { PAGES, pageUrl } from './pages.ts'
 import { renderNotFound, renderPage, renderRobots, renderSitemap, type Assets } from './template.ts'
 import { validateOutput, validateRegistry } from './validate.ts'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = resolve(here, '..', process.env.SITE_OUT ?? 'dist-hosted')
-const require = createRequire(import.meta.url)
 
 const hash = (data: string | Buffer) => createHash('sha256').update(data).digest('hex').slice(0, 10)
-
-const fontFile = (pkg: string, file: string) => join(dirname(require.resolve(`${pkg}/package.json`)), 'files', file)
 
 const minify = (css: string) =>
   css
@@ -33,11 +30,12 @@ async function publishAsset(name: string, ext: string, data: string | Buffer) {
 async function buildAssets(): Promise<Assets> {
   await rm(join(out, 'site-assets'), { recursive: true, force: true })
   await mkdir(join(out, 'site-assets'), { recursive: true })
-  const display = await publishAsset('anybody', 'woff2', await readFile(fontFile('@fontsource-variable/anybody', 'anybody-latin-wdth-normal.woff2')))
-  const body = await publishAsset('schibsted-grotesk', 'woff2', await readFile(fontFile('@fontsource-variable/schibsted-grotesk', 'schibsted-grotesk-latin-wght-normal.woff2')))
+  const urls = new Map<string, string>()
+  for (const face of FONTS) urls.set(face.file, await publishAsset(face.file.replace(/\.woff2$/, ''), 'woff2', await readFile(fontPath(face))))
   const source = await readFile(join(here, 'site.css'), 'utf8')
-  const css = await publishAsset('site', 'css', minify(source.replaceAll('@@display-font@@', display).replaceAll('@@body-font@@', body)))
-  return { css, fonts: { display, body } }
+  const css = await publishAsset('site', 'css', minify(`${fontFaceCss(face => urls.get(face.file)!)}\n${source}`))
+  const toc = await publishAsset('toc', 'js', await readFile(join(here, 'toc.js'), 'utf8'))
+  return { css, preload: FONTS.filter(face => face.preload).map(face => urls.get(face.file)!), toc }
 }
 
 async function writePage(slug: string, html: string) {

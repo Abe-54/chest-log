@@ -60,7 +60,7 @@ async function checkPage(slug: string) {
       ogTitle: meta('meta[property="og:title"]'),
       twitterCard: meta('meta[name="twitter:card"]'),
       types: ld.flatMap(block => (block['@graph'] ?? [block]).map((node: { '@type': string }) => node['@type'])),
-      details: document.querySelectorAll('details').length,
+      details: document.querySelectorAll('details.qa').length,
       analytics: !!document.querySelector(`script[src="${'/_vercel/insights/script.js'}"]`),
       disclaimer: document.body.innerText.includes('Not affiliated with or endorsed by Epic Games.'),
       updated: document.querySelector('time')?.getAttribute('datetime') ?? null,

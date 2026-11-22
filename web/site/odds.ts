@@ -57,6 +57,9 @@ type CalcLib = {
 
 export const calc = new Function(`${CALC_SOURCE}; return { chanceAtLeastOne, chestsFor, formatPercent, formatCount }`)() as CalcLib
 
+/** The demo week the app ships with. The landing page quotes its numbers. */
+export const DEMO = { chests: 3_626, bestMatch: 77 } as const
+
 export const DEFAULT_CHESTS = { normal: 10_000, hours: 0 } as const
 
 export const COMMON_COUNTS = [1_000, 5_000, 10_000, 25_000, 50_000, 100_000, 250_000] as const
