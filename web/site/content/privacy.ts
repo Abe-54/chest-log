@@ -42,7 +42,7 @@ export const privacy: Page = {
     {
       id: 'code',
       heading: 'Check it yourself',
-      html: `<p>The code is public on ${link(SITE.repo, 'GitHub')}, including the code that reads replays in your browser.</p><p>${SITE.disclaimer}</p>`,
+      html: `<p>The code is public on ${link(SITE.repo, 'GitHub')}, including the code that reads replays in your browser.</p>`,
     },
   ],
   faq: [],

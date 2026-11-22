@@ -25,7 +25,7 @@ const ladder = `<div class="ladder"><ol>${LADDER.map(row => {
   const chance = calc.chanceAtLeastOne(psa.oneIn, 1, row.chests, 0)
   const classes = [row.demo ? 'is-demo' : '', row.wideOnly ? 'wide-only' : ''].filter(Boolean).join(' ')
   return `<li${classes ? ` class="${classes}"` : ''}><span class="l">${row.label}</span><span class="track" aria-hidden="true"><span class="fill" style="--w:${(chance * 100).toFixed(2)}%"></span></span><span class="v">${ladderPercent(chance)}</span></li>`
-}).join('')}</ol><p class="ladder-note">Odds that at least one token dropped: 1 &minus; (1 &minus; 1/${calc.formatCount(psa.oneIn)})^chests. A coin flip takes ${calc.formatCount(coinFlip)} chests.</p></div>`
+}).join('')}</ol><p class="ladder-note">Odds that at least one token dropped: 1 &minus; (1 &minus; 1/${calc.formatCount(psa.oneIn)})<sup>N</sup> for N chests. A coin flip takes ${calc.formatCount(coinFlip)} chests.</p>${cite('epic-drop-rates')}</div>`
 
 const steps = (items: { title: string; body: string }[]) =>
   `<ol class="home-steps">${items.map(item => `<li><h3>${item.title}</h3><p>${item.body}</p></li>`).join('')}</ol>`
@@ -39,7 +39,7 @@ export const home: Page = {
   h1: 'Count every Fortnite chest from your replays',
   hero: {
     promise: 'Free for Windows PC. Runs in your browser, and nothing is uploaded.',
-    note: 'Counting needs the replay files on your Windows PC. Open this page there, or try the demo here.',
+    note: 'Free, and nothing is uploaded. Counting needs the replay files on your Windows PC, so open this page there or try the demo here.',
   },
   lede: `<p>With replays turned on, Fortnite saves every match. Chest Log reads them, counts the chests your squad opened, and plays each match back on the island.</p>`,
   ctas: [
@@ -53,17 +53,17 @@ export const home: Page = {
     {
       id: 'how-it-works',
       heading: 'How it works',
-      aside: `<p>Chest Log is a free Fortnite chest counter for Windows PC. With replays turned on, Fortnite saves a file for every match, and Chest Log reads those files inside your browser tab. ${link('/fortnite-replay-files/', 'Find your replay folder')}.</p>`,
+      aside: `<p>Three steps on your Windows PC, all inside a browser tab. ${link('/fortnite-replay-files/', 'Where Fortnite keeps replays')}.</p>`,
       html: steps([
-        { title: 'Pick your Fortnite replay folder', body: 'Chest Log shows you the exact path. Or drop in a single .replay file.' },
-        { title: 'Your browser reads the replays', body: 'Every chest you or your squad opened or broke gets counted, match by match.' },
-        { title: 'Watch any match back', body: 'Your week, your token odds, and every match on the island with each chest pinned where you opened it.' },
+        { title: 'Turn replays on', body: 'In Fortnite, Settings, then the Game tab, then Replays. Fortnite only saves matches played after that.' },
+        { title: 'Pick your replay folder', body: 'Chest Log shows you the exact path, or drop in a single .replay file. Every chest your squad opened gets counted, match by match.' },
+        { title: 'Watch any match back', body: 'Play any match on the island with each chest pinned where it was opened, next to your weekly total and token odds.' },
       ]),
     },
     {
       id: 'token-odds',
-      heading: 'Did your squad find a Pirate Shop token yet?',
-      html: `<div class="panel-copy"><p>Epic puts the drop at 1 in ${calc.formatCount(psa.oneIn)} per chest, and any squadmate's find goes to the whole squad. So every chest your squad opens is a roll for you, and Chest Log turns your squad's real count into your odds.</p><p class="cta-row"><a class="btn btn-inline btn-ink" href="/treasure-hunters-odds/">Get my odds</a></p>${cite('epic-drop-rates')}</div><div class="odds-side"><p class="odds-figure"><strong>${ladderPercent(calc.chanceAtLeastOne(psa.oneIn, 1, DEMO.chests, 0))}</strong><span>chance the demo squad found one in ${calc.formatCount(DEMO.chests)} chests</span></p>${ladder}</div>`,
+      heading: 'Did your squad find the Pirate token yet?',
+      html: `<div class="panel-copy"><p>Epic puts the drop at 1 in ${calc.formatCount(psa.oneIn)} per chest, and any squadmate's find goes to the whole squad. So every chest your squad opens is a roll for you. Count your chests and Chest Log works out your odds, or enter a number in the calculator.</p><p class="cta-row"><a class="btn btn-inline btn-ink" href="/treasure-hunters-odds/">Open the odds calculator</a></p></div><div class="odds-side"><p class="odds-figure"><strong>${ladderPercent(calc.chanceAtLeastOne(psa.oneIn, 1, DEMO.chests, 0))}</strong><span>chance the demo squad found one in ${calc.formatCount(DEMO.chests)} chests</span></p>${ladder}</div>`,
     },
     {
       id: 'manual-vs-replay',

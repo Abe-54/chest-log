@@ -52,7 +52,7 @@ export const hours: Page = {
     {
       id: 'schedule',
       heading: 'When Treasure Hours happen',
-      html: `<p>Epic announces each Treasure Hours on its Fortnite Communities page and on Fortnite Status. This page does not list start times, because the announcements are the source and Epic can change them. Epic's posts for this season so far:</p><ul>
+      html: `<p>Epic announces each Treasure Hours on its ${link('https://communities.epicgames.com/', 'Fortnite Communities page')} and on ${link('https://x.com/FortniteStatus', 'Fortnite Status')}. This page does not list start times, because the announcements are the source and Epic can change them. Epic's posts for this season so far:</p><ul>
 <li>${sourceLink('epic-hours-nov7')}</li>
 <li>${sourceLink('epic-hours-nov14')}</li>
 <li>${sourceLink('epic-hours-nov21')}</li>
@@ -72,7 +72,7 @@ export const hours: Page = {
     },
     {
       q: 'When is the next Treasure Hours?',
-      a: `Epic announces each one on its Fortnite Communities page and on Fortnite Status. We do not list times here because Epic can change them.`,
+      a: `Epic announces each one on its ${link('https://communities.epicgames.com/', 'Fortnite Communities page')} and on ${link('https://x.com/FortniteStatus', 'Fortnite Status')}. We do not list times here because Epic can change them.`,
     },
   ],
   related: ['treasure-hunters-odds', 'fortnite-replay-files', 'faq', 'auto-track'],

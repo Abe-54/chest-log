@@ -18,10 +18,10 @@ const hamburger = `<svg class="menu-icon" viewBox="0 0 24 24" width="24" height=
 
 /** Closes the menu on Escape or an outside tap; hands the page to a PC from a phone by sharing or copying its link. */
 const menuScript = `<script>(function(){var url=location.origin+location.pathname;var toast=document.querySelector('[data-toast]');
-function say(text){toast.textContent=text;toast.classList.add('is-on');clearTimeout(say.t);say.t=setTimeout(function(){toast.classList.remove('is-on')},2600)}
+function say(text,long){toast.textContent=text;toast.classList.add('is-on');clearTimeout(say.t);say.t=setTimeout(function(){toast.classList.remove('is-on')},long?8000:2600)}
 document.querySelectorAll('[data-send-to-pc]').forEach(function(b){b.addEventListener('click',function(){var data={title:'Chest Log',text:'Count my Fortnite chests on PC',url:url};
-if(navigator.share){navigator.share(data).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){say('Link copied. Open it on your PC.')},function(){say(url)})}else{say(url)}})});
-function shut(m,focus){m.removeAttribute('open');if(focus)m.querySelector('summary').focus()}document.addEventListener('click',function(e){var m=document.querySelector('details.menu[open]');if(m&&!m.contains(e.target))shut(m,false)});document.addEventListener('keydown',function(e){var m=document.querySelector('details.menu[open]');if(m&&e.key==='Escape')shut(m,true)})})()</script>`
+if(navigator.share){navigator.share(data).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){say('Link copied. Open it on your PC.')},function(){say(url,1)})}else{say(url,1)}})});
+function shut(m,focus){m.removeAttribute('open');if(focus)m.querySelector('summary').focus()}document.addEventListener('touchstart',function(){},{passive:true});document.addEventListener('click',function(e){var m=document.querySelector('details.menu[open]');if(m&&(!m.contains(e.target)||e.target.closest('.menu-panel a')))shut(m,false)});document.addEventListener('keydown',function(e){var m=document.querySelector('details.menu[open]');if(m&&e.key==='Escape')shut(m,true)})})()</script>`
 
 const NAV = [
   { href: '/#how-it-works', text: 'How it works' },
@@ -130,9 +130,9 @@ const homeCtas = (extra = '') => `<p class="cta-row on-pc">${button({ label: 'Co
 
 /** Shares the page link on phones (or copies it), and keeps the header button out of the way while the hero's own buttons are on screen. */
 /** Keeps the header button out of the way while the hero's own buttons are on screen. */
-const homeScript = `(function(){if(!('IntersectionObserver' in window))return;
+const homeScript = `(function(){if(!('IntersectionObserver' in window)){document.body.classList.add('hero-cta-off');return}
 var rows=document.querySelectorAll('.hero-copy .cta-row'),seen=new Map();
-var io=new IntersectionObserver(function(es){es.forEach(function(e){seen.set(e.target,e.isIntersecting)});document.body.classList.toggle('hero-cta-on',Array.from(seen.values()).some(Boolean))});rows.forEach(function(r){io.observe(r)})})()`
+var io=new IntersectionObserver(function(es){es.forEach(function(e){seen.set(e.target,e.isIntersecting)});document.body.classList.toggle('hero-cta-off',!Array.from(seen.values()).some(Boolean))});rows.forEach(function(r){io.observe(r)})})()`
 
 const renderHome = (page: Page, assets: Assets) => `<main id="main">
 <section class="hero">
@@ -183,9 +183,10 @@ const tocNav = (page: Page) =>
   tocEntries(page).length === 0 ? '<div></div>' : `<nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p>${tocList(page, true)}</nav>`
 
 const DEFAULT_CTA: Cta = { label: 'Count my chests', href: SITE.app.track, kind: 'primary' }
+const DEMO_CTA: Cta = { label: 'Try the demo', href: SITE.app.demo, kind: 'secondary' }
 
 /** Like the home page, phones get the demo and a way to send the page to their PC, never a tracker they cannot run. */
-const ctaCard = (page: Page) => `<aside class="cta-card" aria-labelledby="cta-h"><div><h2 id="cta-h">Get your own number</h2><p class="on-pc">Count your real chests from your replays. Nothing uploaded.</p><p class="on-touch">Counting needs the replay files on your Windows PC. Send this page there, or see a real squad's week in the demo.</p></div><p class="cta-row on-pc">${(page.ctas ?? [DEFAULT_CTA]).map(cta => button(cta, ' btn-inline')).join('')}</p><p class="cta-row on-touch">${button({ label: 'Try the demo', href: SITE.app.demo, kind: 'primary' }, ' btn-inline')}<button type="button" class="btn btn-ghost btn-inline" data-send-to-pc>Send this to my PC</button></p></aside>`
+const ctaCard = (page: Page) => `<aside class="cta-card" aria-labelledby="cta-h"><div><h2 id="cta-h">Count your own chests</h2><p class="on-pc">Free, nothing uploaded, and every match back on the map.</p><p class="on-touch">Counting needs the replay files on your Windows PC. Send this page there, or see a real squad's week in the demo.</p></div><p class="cta-row on-pc">${[page.ctas?.[0] ?? DEFAULT_CTA, DEMO_CTA].map(cta => button(cta, ' btn-inline')).join('')}</p><p class="cta-row on-touch">${button({ label: 'Try the demo', href: SITE.app.demo, kind: 'primary' }, ' btn-inline')}<button type="button" class="btn btn-ghost btn-inline" data-send-to-pc>Send this to my PC</button></p></aside>`
 
 const related = (page: Page) =>
   page.related.length === 0
