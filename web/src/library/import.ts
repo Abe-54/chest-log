@@ -1,22 +1,25 @@
 import { Store } from '@tanstack/store'
+import { base } from '~/lib/mode'
 import { clearLibrary, getValue, setValue, type LibraryMeta } from './db'
 import type { Job, Report } from './worker'
 import workerUrl from './worker.ts?worker&url'
 
-/** One import run, from picked files to a rebuilt library. */
+/** The import running now, from picked files to a rebuilt library. */
 export type ImportState =
   | { phase: 'idle' }
   | { phase: 'parsing'; total: number; done: number; added: number; failed: number; current: string | null }
   | { phase: 'building'; total: number; added: number; failed: number }
-  | { phase: 'done'; added: number; skipped: number; meta: LibraryMeta; before: number | null; total: number }
   | { phase: 'error'; message: string }
+
+/** What a finished import changed. `before` is the chest total ahead of it, null for a first import. */
+export interface ImportOutcome { added: number; skipped: number; meta: LibraryMeta; before: number | null; total: number }
 
 export const importStore = new Store<ImportState>({ phase: 'idle' })
 const set = (state: ImportState) => importStore.setState(() => state)
 
 /** The parser's memory only grows, so a big folder is split across fresh workers. */
 const FILES_PER_WORKER = 20
-const isReplay = (file: File) => /\.replay$/i.test(file.name)
+const isReplay = (file: { name: string }) => /\.replay$/i.test(file.name)
 
 /**
  * .NET's browser runtime starts in a worker only when it is imported statically; through a dynamic import it never
@@ -24,7 +27,7 @@ const isReplay = (file: File) => /\.replay$/i.test(file.name)
  * and then loads the bundled worker.
  */
 function workerScript() {
-  const engine = new URL('/engine/engine.js', location.href).href
+  const engine = new URL(`${base}engine/engine.js`, location.href).href
   const worker = new URL(workerUrl, location.href).href
   const source = `import { loadEngine } from ${JSON.stringify(engine)}; self.loadEngine = loadEngine; await import(${JSON.stringify(worker)})`
   return URL.createObjectURL(new Blob([source], { type: 'text/javascript' }))
@@ -46,10 +49,13 @@ function run(job: Job, onReport: (report: Report) => void) {
 }
 
 /** Reads the picked files in this browser and rebuilds the library. Files already read are skipped. */
-export async function importReplays(picked: File[]) {
+export async function importReplays(picked: File[]): Promise<ImportOutcome | undefined> {
   if (importStore.state.phase === 'parsing' || importStore.state.phase === 'building') return
   const files = picked.filter(isReplay).sort((a, b) => a.name.localeCompare(b.name))
-  if (files.length === 0) return set({ phase: 'error', message: 'No .replay files in there. Fortnite keeps them in the Demos folder.' })
+  if (files.length === 0) {
+    set({ phase: 'error', message: 'No .replay files in there. Fortnite keeps them in the Demos folder.' })
+    return
+  }
   try {
     const before = (await getValue('week'))?.total ?? null
     const progress = { phase: 'parsing' as const, total: files.length, done: 0, added: 0, failed: 0, current: null as string | null }
@@ -70,7 +76,8 @@ export async function importReplays(picked: File[]) {
     set({ phase: 'building', total: files.length, added: progress.added, failed: progress.failed })
     const built = await run({ type: 'build', timeZone }, () => undefined)
     if (built.type !== 'built') throw new Error('the library was not rebuilt')
-    set({ phase: 'done', added: progress.added, skipped, meta: built.meta, before, total: built.total })
+    set({ phase: 'idle' })
+    return { added: progress.added, skipped, meta: built.meta, before, total: built.total }
   } catch (error) {
     set({ phase: 'error', message: error instanceof Error ? error.message : String(error) })
   }
@@ -78,36 +85,27 @@ export async function importReplays(picked: File[]) {
 
 export const canPickFolder = typeof window !== 'undefined' && 'showDirectoryPicker' in window
 
-async function filesIn(folder: FileSystemDirectoryHandle) {
+export async function filesIn(folder: FileSystemDirectoryHandle) {
   const files: File[] = []
   for await (const entry of folder.values()) {
-    if (entry.kind === 'file' && /\.replay$/i.test(entry.name)) files.push(await (entry as FileSystemFileHandle).getFile())
+    if (entry.kind === 'file' && isReplay(entry)) files.push(await (entry as FileSystemFileHandle).getFile())
   }
   return files
 }
 
-/** Chromium only: asks for the folder once and remembers it, so later visits can rescan it with one click. */
-export async function pickFolder() {
-  let folder: FileSystemDirectoryHandle
+/** Chromium only: asks for the Demos folder and remembers it, so later visits can watch it without asking again. */
+export async function chooseFolder() {
   try {
-    folder = await window.showDirectoryPicker({ id: 'fortnite-demos', mode: 'read' })
+    const folder = await window.showDirectoryPicker({ id: 'fortnite-demos', mode: 'read' })
+    await setValue('folder', folder)
+    return folder
   } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') return
+    if (error instanceof DOMException && error.name === 'AbortError') return undefined
     throw error
   }
-  await setValue('folder', folder)
-  await importReplays(await filesIn(folder))
 }
 
-export const rememberedFolder = () => getValue('folder').then(folder => folder?.name ?? null).catch(() => null)
-
-/** Must be called from a click: the browser asks again for permission to read the remembered folder. */
-export async function rescanFolder() {
-  const folder = await getValue('folder')
-  if (!folder) return pickFolder()
-  if (await folder.requestPermission({ mode: 'read' }) !== 'granted') return
-  await importReplays(await filesIn(folder))
-}
+export const rememberedFolder = () => getValue('folder').catch(() => undefined)
 
 /** Files and folders dropped on the page. */
 export async function droppedFiles(items: DataTransferItemList) {

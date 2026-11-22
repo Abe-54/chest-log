@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ImportRouteImport } from './routes/import'
+import { Route as TrackRouteImport } from './routes/track'
 import { Route as ClipsIndexRouteImport } from './routes/clips.index'
 import { Route as ClipsClipIdRouteImport } from './routes/clips.$clipId'
 import { Route as MatchesIndexRouteImport } from './routes/matches.index'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const ImportRoute = ImportRouteImport.update({
   id: '/import',
   path: '/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackRoute = TrackRouteImport.update({
+  id: '/track',
+  path: '/track',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClipsIndexRoute = ClipsIndexRouteImport.update({
@@ -50,6 +56,7 @@ const MatchesMatchIdRoute = MatchesMatchIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/import': typeof ImportRoute
+  '/track': typeof TrackRoute
   '/clips/$clipId': typeof ClipsClipIdRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/clips/': typeof ClipsIndexRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/import': typeof ImportRoute
+  '/track': typeof TrackRoute
   '/clips/$clipId': typeof ClipsClipIdRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/clips': typeof ClipsIndexRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/import': typeof ImportRoute
+  '/track': typeof TrackRoute
   '/clips/$clipId': typeof ClipsClipIdRoute
   '/matches/$matchId': typeof MatchesMatchIdRoute
   '/clips/': typeof ClipsIndexRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/import'
+    | '/track'
     | '/clips/$clipId'
     | '/matches/$matchId'
     | '/clips/'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/import'
+    | '/track'
     | '/clips/$clipId'
     | '/matches/$matchId'
     | '/clips'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/import'
+    | '/track'
     | '/clips/$clipId'
     | '/matches/$matchId'
     | '/clips/'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ImportRoute: typeof ImportRoute
+  TrackRoute: typeof TrackRoute
   ClipsClipIdRoute: typeof ClipsClipIdRoute
   MatchesMatchIdRoute: typeof MatchesMatchIdRoute
   ClipsIndexRoute: typeof ClipsIndexRoute
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/import'
       fullPath: '/import'
       preLoaderRoute: typeof ImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clips/': {
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ImportRoute: ImportRoute,
+  TrackRoute: TrackRoute,
   ClipsClipIdRoute: ClipsClipIdRoute,
   MatchesMatchIdRoute: MatchesMatchIdRoute,
   ClipsIndexRoute: ClipsIndexRoute,

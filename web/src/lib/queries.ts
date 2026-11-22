@@ -1,12 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 import type { Clips, Match, Week } from '~/data'
 import { getMatch, getValue } from '~/library/db'
-
-/**
- * Where the pages get their data. The local build reads files this PC's server builds from its own replays.
- * The hosted build has no server data: each visitor's replays are parsed in their browser and kept there.
- */
-export const hosted = import.meta.env.VITE_HOSTED === '1'
+import { base, demo, hosted } from '~/lib/mode'
 
 export class HttpError extends Error {
   constructor(readonly path: string, readonly status: number) {
@@ -30,13 +25,21 @@ async function stored<T>(name: string, read: Promise<T | undefined>): Promise<T>
   return value
 }
 
+/**
+ * Where the pages get their data. The local build reads files this PC's server builds from its own replays.
+ * The hosted build has no server data: each visitor's replays are parsed in their browser and kept there, and the
+ * demo reads a fixed library published beside the app.
+ */
 const source = <T>(name: string, local: () => Promise<T | undefined>) =>
-  hosted ? () => stored(name, local()) : () => getJson<T>(`/data/${name}.json`)
+  demo ? () => getJson<T>(`${base}demo/${name}.json`)
+    : hosted ? () => stored(name, local())
+    : () => getJson<T>(`/data/${name}.json`)
 
 const forever = { staleTime: Infinity, gcTime: 30 * 60 * 1000 }
 export const weekQuery = queryOptions({ queryKey: ['week'], queryFn: source<Week>('week', () => getValue('week')), ...forever })
 // Clips are videos recorded on the PC that runs the local build; a hosted library has none.
-export const clipsQuery = queryOptions({ queryKey: ['clips'], queryFn: source<Clips>('clips', async () => ({ tolerance: 0, clips: [] })), ...forever })
+const noClips: Clips = { tolerance: 0, clips: [] }
+export const clipsQuery = queryOptions({ queryKey: ['clips'], queryFn: hosted ? async () => noClips : () => getJson<Clips>('/data/clips.json'), ...forever })
 export const matchQuery = (id: string) => queryOptions({
   queryKey: ['match', id],
   queryFn: source<Match>(`matches/${encodeURIComponent(id)}`, () => getMatch(id)),
