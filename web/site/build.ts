@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs'
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { SITE } from './config.ts'
 import { FONTS, fontFaceCss, fontPath } from './fonts.ts'
 import { PAGES, pageUrl } from './pages.ts'
 import { renderNotFound, renderPage, renderRobots, renderSitemap, type Assets } from './template.ts'
@@ -59,6 +60,7 @@ async function main() {
   await writeFile(join(out, '404.html'), renderNotFound(assets))
   await writeFile(join(out, 'sitemap.xml'), renderSitemap())
   await writeFile(join(out, 'robots.txt'), renderRobots())
+  await writeFile(join(out, `${SITE.indexNowKey}.txt`), SITE.indexNowKey)
   for (const [from, to] of [['og.png', 'og.png'], ['logo.png', 'logo.png'], ['favicon.svg', 'favicon.svg']] as const) {
     await copyFile(join(here, 'assets', from), join(out, to))
   }
