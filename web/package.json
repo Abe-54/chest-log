@@ -16,6 +16,7 @@
     "site:serve": "tsx site/serve.ts",
     "site:verify": "tsx site/verify.ts",
     "site:og": "tsx site/og.ts",
+    "site:indexnow": "tsx site/indexnow.ts",
     "site:test": "tsx --test site/*.test.ts",
     "site:typecheck": "tsc-rs --noEmit -p site/tsconfig.json"
   },
