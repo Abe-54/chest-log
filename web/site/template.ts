@@ -128,11 +128,10 @@ const homeSection = (section: Page['sections'][number]) => {
  */
 const homeCtas = (extra = '') => `<p class="cta-row on-pc">${button({ label: 'Count my chests', href: SITE.app.track, kind: 'primary' })}${button({ label: 'Try the demo', href: SITE.app.demo, kind: 'secondary' }, extra)}</p><p class="cta-row on-touch">${button({ label: 'Try the demo', href: SITE.app.demo, kind: 'primary' })}<button type="button" class="btn btn-ghost${extra}" data-send-to-pc>Send this to my PC</button></p>`
 
-/** Shares the page link on phones (or copies it), and keeps the header button out of the way while the hero's own buttons are on screen. */
 /** Keeps the header button out of the way while the hero's own buttons are on screen. */
 const homeScript = `(function(){if(!('IntersectionObserver' in window)){document.body.classList.add('hero-cta-off');return}
 var rows=document.querySelectorAll('.hero-copy .cta-row'),seen=new Map();
-var io=new IntersectionObserver(function(es){es.forEach(function(e){seen.set(e.target,e.isIntersecting)});document.body.classList.toggle('hero-cta-off',!Array.from(seen.values()).some(Boolean))});rows.forEach(function(r){io.observe(r)})})()`
+var bar=document.querySelector('.site-header');var io=new IntersectionObserver(function(es){es.forEach(function(e){seen.set(e.target,e.isIntersecting)});document.body.classList.toggle('hero-cta-off',!Array.from(seen.values()).some(Boolean))},{rootMargin:'-'+(bar?bar.offsetHeight:0)+'px 0px 0px 0px'});rows.forEach(function(r){io.observe(r)})})()`
 
 const renderHome = (page: Page, assets: Assets) => `<main id="main">
 <section class="hero">
@@ -145,7 +144,7 @@ ${mapHero(assets.map)}
 </section>
 ${page.sections.map(homeSection).join('\n')}
 <section class="home-section faq-home" id="faq-list" aria-labelledby="faq-h"><div class="wrap"><h2 id="faq-h">${faqHeading(page)}</h2>${faqItems(page)}<p class="faq-stamp">Answers updated <time datetime="${page.updated}">${longDate(page.updated)}</time>. <a href="/faq/">All questions</a></p></div></section>
-<section class="final-cta" aria-labelledby="cta-h"><div class="final-map" aria-hidden="true" style="background-image:url(${assets.map.small})"></div><div class="wrap"><h2 id="cta-h"><span class="on-pc">How many chests did your squad open this week?</span><span class="on-touch">See a real squad's week in the demo</span></h2>${homeCtas(' cta-btn-secondary')}</div></section>
+<section class="final-cta" aria-labelledby="cta-h"><div class="final-map" aria-hidden="true" style="background-image:url(${assets.map.small})"></div><div class="wrap"><h2 id="cta-h"><span class="on-pc">How many chests did your squad open this week?</span><span class="on-touch">See a real squad's week in the demo</span></h2>${homeCtas()}</div></section>
 </main>`
 
 /* Articles */

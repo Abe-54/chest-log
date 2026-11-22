@@ -41,7 +41,7 @@ export const home: Page = {
     promise: 'Free for Windows PC. Runs in your browser, and nothing is uploaded.',
     note: 'Free, and nothing is uploaded. Counting needs the replay files on your Windows PC, so open this page there or try the demo here.',
   },
-  lede: `<p>With replays turned on, Fortnite saves every match. Chest Log reads them, counts the chests your squad opened, and plays each match back on the island.</p>`,
+  lede: `<p>With replays turned on, Fortnite saves every match. Chest Log reads them, counts the chests your squad opened, works out your Pirate token odds, and plays each match back on the island.</p>`,
   ctas: [
     { label: 'Count my chests', href: SITE.app.track, kind: 'primary' },
     { label: 'Try the demo', href: SITE.app.demo, kind: 'secondary' },
@@ -70,7 +70,7 @@ export const home: Page = {
       heading: 'Why count from replays instead of by hand',
       html: `<p>A manual counter only knows what you told it. A replay is the game's own record of the match, so counting from replays does not depend on your memory.</p>${table({
         caption: 'Manual chest counters compared with counting from replays',
-        head: ['', 'Manual counter', 'Chest Log'],
+        head: ['Compared', 'Manual counter', 'Chest Log'],
         stack: true,
         rows: [
           ['During a match', 'You tap or type each time you open a chest.', 'Nothing. You play normally.'],

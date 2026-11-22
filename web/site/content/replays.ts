@@ -44,7 +44,7 @@ export const replays: Page = {
       id: 'use-chest-log',
       heading: 'Point Chest Log at the folder',
       html: `${steps([
-        { title: 'Open Chest Log', body: `Go to ${link(SITE.app.track, 'the tracker')} and choose your replay folder.` },
+        { title: 'Open Chest Log', body: `On your PC, choose ${link(SITE.app.track, 'Count my chests')} and pick your replay folder.` },
         { title: 'Open the Demos folder', body: `In the window that opens, paste ${pathCode(SITE.demosPath)} into the address bar, press Enter, then select the folder.` },
         { title: 'Wait for the import', body: 'Chest Log takes about two seconds for each replay file. Keep the tab open while it works.' },
       ])}<p>Chrome and Edge remember the folder. In other browsers you can pick the files or drop the folder onto the page each time.</p>`,

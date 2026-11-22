@@ -40,7 +40,7 @@ export const autoTrack: Page = {
     {
       id: 'other-browsers',
       heading: 'Other browsers',
-      html: `<p>Firefox and Safari do not let a web page remember a folder, at the time of writing. You can still import replay files in them, but you choose the files each time and there is no Auto-track. If the app does not offer to remember a folder, your browser does not support it.</p>`,
+      html: `<p>Firefox and Safari do not let a web page remember a folder, at the time of writing. You can still import replay files in them, but you choose the files each time and there is no Auto-track. If Chest Log does not offer to remember a folder, your browser does not support it.</p>`,
     },
     {
       id: 'background-tabs',

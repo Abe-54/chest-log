@@ -82,7 +82,7 @@ export function mapHero(image: { small: string; large: string }) {
   const chipWidth = Math.round(place.length * 44 * 0.56 + CHIP_PAD * 2)
   const crop = `width:${round((MAP_PX / size) * 100)}%;left:${round((-x / size) * 100)}%;top:${round((-y / size) * 100)}%`
   const times = delays.map(delay => Math.round(delay * 1000)).sort((a, b) => a - b).join(',')
-  return `<div class="hero-visual" data-hero-map>
+  return `<div class="hero-visual" data-hero-map style="--route-start:${ROUTE_START}s">
 <div class="hero-map" role="img" aria-label="${esc(`The Fortnite island map with one demo match's route drawn on it and a pin for each of its ${match.chests} chests`)}">
 <img src="${image.small}" srcset="${image.small} 1024w, ${image.large} 2048w" sizes="(max-width: 767px) 180vw, 1400px" width="${MAP_PX}" height="${MAP_PX}" alt="" fetchpriority="high" decoding="async" style="${crop}">
 <svg viewBox="${x} ${y} ${size} ${size}" aria-hidden="true" focusable="false">
@@ -91,7 +91,7 @@ ${pins}
 <g class="map-end" transform="translate(${round(end.x)} ${round(end.y)})" style="--d:${DRAW_SECONDS}s"><circle r="11"/><g transform="translate(${labelLeft ? -(chipWidth + 22) : 22} -30)"><rect class="map-chip" width="${chipWidth}" height="60" rx="10"/><text x="${CHIP_PAD}" y="43">${esc(place)}</text></g></g>
 </svg>
 </div>
-<p class="map-count" aria-hidden="true"><span class="map-count-n" data-times="${times}">${match.chests}</span><span class="map-count-l">chests one player opened in this match</span></p>
+<p class="map-count" aria-hidden="true"><span class="map-count-n" data-times="${times}">${match.chests}</span><span class="map-count-l">chests one demo player opened in this match</span></p>
 </div>`
 }
 
