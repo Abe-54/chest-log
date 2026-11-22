@@ -105,11 +105,11 @@ function ClipView({ clip, clips, tolerance, zone, start }: { clip: Clip; clips: 
           <Step clip={siblings.previous} label="Previous clip" Icon={ChevronLeft} />
           <Step clip={siblings.next} label="Next clip" Icon={ChevronRight} />
           <button type="button" onClick={() => shareLink(`${clip.label} clip`, shareUrl())} aria-label="Share this moment"
-            className="press ml-1 grid size-10 place-items-center rounded-full bg-gold text-ink hover:bg-bone"><Share2 className="size-4" strokeWidth={2.5} /></button>
+            className="press ml-1 grid size-10 place-items-center rounded-full bg-gold text-ink hover:bg-gold-deep"><Share2 className="size-4" strokeWidth={2.5} /></button>
         </div>
       </header>
 
-      <Container className="relative mt-4 overflow-hidden rounded-2xl border border-line/60 bg-ink">
+      <Container className="relative mt-4 overflow-hidden rounded-panel border border-line bg-ink">
         <VideoSkin style={{ width: '100%', aspectRatio: '43 / 18', ['--media-accent-color' as string]: 'oklch(0.83 0.15 80)' }}>
           <Video src={source} poster={clip.poster} playsInline preload="metadata" />
         </VideoSkin>
@@ -154,7 +154,7 @@ function ClipView({ clip, clips, tolerance, zone, start }: { clip: Clip; clips: 
         </section>
         <aside>
           <Link to="/matches/$matchId" params={{ matchId: clip.matchId }} search={{ t: tenths(clip.replayStart + time) }}
-            className="press flex items-center gap-3 rounded-2xl bg-ink-2 p-4 hover:bg-ink-3">
+            className="press flex items-center gap-3 rounded-panel bg-ink-2 p-4 hover:bg-ink-3">
             <MapIcon className="size-5 text-gold" />
             <span className="text-sm"><b className="block">See this moment on the map</b><span className="num text-mist">Replay at {clock(clip.replayStart + time)}</span></span>
           </Link>
