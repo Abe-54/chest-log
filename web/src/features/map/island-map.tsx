@@ -4,6 +4,7 @@ import { LinearInterpolator, OrthographicView, type Layer, type PickingInfo } fr
 import { BitmapLayer } from '@deck.gl/layers'
 import { Minus, Plus, Scan } from 'lucide-react'
 import { cn } from '~/lib/cn'
+import { base as appBase } from '~/lib/mode'
 
 export const MAP_SIZE = 2048
 export type Bounds = [minX: number, minY: number, maxX: number, maxY: number]
@@ -41,7 +42,7 @@ export interface IslandMapProps {
 export function IslandMap({ layers, fit, follow, onRelease, onPick, label, className, children }: IslandMapProps) {
   const box = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState<{ width: number; height: number } | null>(null)
-  const [image, setImage] = useState('/map/island-1024.webp')
+  const [image, setImage] = useState(`${appBase}map/island-1024.webp`)
   const [viewState, setViewState] = useState<ViewState | null>(null)
   const minZoom = size ? Math.log2(Math.min(size.width, size.height) / MAP_SIZE) - 0.25 : -2
 
@@ -58,7 +59,7 @@ export function IslandMap({ layers, fit, follow, onRelease, onPick, label, class
   useEffect(() => {
     const upgrade = () => {
       const full = new Image()
-      full.src = '/map/island-2048.webp'
+      full.src = `${appBase}map/island-2048.webp`
       full.decode().then(() => setImage(full.src), () => undefined)
     }
     const handle = 'requestIdleCallback' in window ? requestIdleCallback(upgrade, { timeout: 1500 }) : setTimeout(upgrade, 600)
