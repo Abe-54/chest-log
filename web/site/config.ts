@@ -13,6 +13,8 @@ export const SITE = {
   googleVerification: process.env.GOOGLE_SITE_VERIFICATION ?? null,
   // IndexNow proves site ownership with a public key served at /<key>.txt, so it is not a secret.
   indexNowKey: '6d50cfe8fb0d008302faffa1d3693304',
+  // Search Console ownership file for the URL-prefix property. Removing it unverifies the site.
+  googleVerificationFile: 'googlead448a3a9208227b.html',
 } as const
 
 export const CHECKED: IsoDate = '2026-11-22'

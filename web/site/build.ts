@@ -61,6 +61,7 @@ async function main() {
   await writeFile(join(out, 'sitemap.xml'), renderSitemap())
   await writeFile(join(out, 'robots.txt'), renderRobots())
   await writeFile(join(out, `${SITE.indexNowKey}.txt`), SITE.indexNowKey)
+  await writeFile(join(out, SITE.googleVerificationFile), `google-site-verification: ${SITE.googleVerificationFile}`)
   for (const [from, to] of [['og.png', 'og.png'], ['logo.png', 'logo.png'], ['favicon.svg', 'favicon.svg']] as const) {
     await copyFile(join(here, 'assets', from), join(out, to))
   }
