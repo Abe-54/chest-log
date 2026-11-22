@@ -26,9 +26,9 @@ for (const start of ['/', '/import', '/matches']) {
   await page.goto(site + start, { waitUntil: 'networkidle' })
   check(path() === '/app/track', `/app${start === '/' ? '/' : start} lands on /app/track`)
 }
-check(await page.getByRole('heading', { name: 'Watch your Demos folder' }).isVisible(), 'Auto-track offers the Demos folder')
-check(await page.getByRole('heading', { name: 'Add a replay' }).isVisible(), 'Auto-track offers a single replay')
-check((await page.locator('code').filter({ hasText: 'FortniteGame' }).innerText()).includes('%LOCALAPPDATA%\\FortniteGame\\Saved\\Demos'), 'it names the Demos folder')
+check(await page.getByRole('heading', { name: 'Pick your Demos folder' }).isVisible(), 'Auto-track offers the Demos folder')
+check(await page.getByRole('heading', { name: 'Drop a replay here' }).isVisible(), 'Auto-track offers a single replay')
+check((await page.locator('code').filter({ hasText: 'FortniteGame' }).first().innerText()).includes('%LOCALAPPDATA%\\FortniteGame\\Saved\\Demos'), 'it names the Demos folder')
 await shot('track')
 
 // The replay reader starts from /app/engine in a worker. A file that is not a replay is read and refused.
@@ -46,7 +46,7 @@ await page.evaluate(async () => {
 })
 await page.getByRole('button', { name: 'Choose Demos folder' }).click()
 const status = page.getByRole('status')
-await status.getByText(/last checked \d+s ago · 0 new/).waitFor({ timeout: 30_000 })
+await status.getByText(/Next check in \d+ s · checked \d+ s ago/).waitFor({ timeout: 30_000 })
 check(true, `watching shows "${(await status.innerText()).split('\n')[0]}"`)
 check(await page.getByRole('button', { name: 'Stop watching' }).isVisible(), 'watching offers a stop button')
 await shot('watching')
@@ -57,7 +57,7 @@ check(await page.getByRole('button', { name: /^Resume/ }).isVisible(), 'stopping
 await page.goto(site + '/track', { waitUntil: 'networkidle' })
 await page.getByRole('link', { name: 'Try the demo library' }).click()
 await page.waitForURL('**/app/demo')
-await page.getByText(/chests cracked/).waitFor()
+await page.getByRole('heading', { level: 1, name: /Chests$/ }).waitFor()
 check(path() === '/app/demo', 'the demo opens at /app/demo')
 check(await page.getByText('Demo library').isVisible() && (await page.getByRole('link', { name: 'Add your own replays' }).getAttribute('href')) === '/app/track', 'the demo says so and links to /app/track')
 check(!(await page.getByRole('link', { name: 'Add replays' }).count()), 'the demo has no way to add replays')

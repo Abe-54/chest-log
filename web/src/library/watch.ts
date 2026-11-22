@@ -14,7 +14,10 @@ export const CHECK_EVERY_MS = 30_000
 export type WatchState =
   | { phase: 'off' }
   | { phase: 'paused'; folder: string; reason: string | null }
-  | { phase: 'watching'; folder: string; checkedAt: number | null; found: number }
+  | { phase: 'watching'; folder: string; checkedAt: number | null; session: SessionImport[] }
+
+/** One check that added matches while watching, newest first in the session list. */
+export interface SessionImport { at: number; added: number; gained: number }
 
 export const watchStore = new Store<WatchState>({ phase: 'off' })
 const set = (state: WatchState) => watchStore.setState(() => state)
@@ -53,7 +56,10 @@ async function read(folder: FileSystemDirectoryHandle, started: number) {
     const outcome = fresh.length > 0 ? await importReplays(fresh) : undefined
     if (stale()) return
     const state = watchStore.state
-    if (state.phase === 'watching') set({ ...state, checkedAt: Date.now(), found: state.found + (outcome?.added ?? 0) })
+    if (state.phase === 'watching') {
+      const gained = outcome && { at: Date.now(), added: outcome.added, gained: outcome.total - (outcome.before ?? 0) }
+      set({ ...state, checkedAt: Date.now(), session: gained && gained.added > 0 ? [gained, ...state.session] : state.session })
+    }
     if (outcome) onImported(outcome)
   } catch {
     if (!stale()) pause('The folder could not be read. Choose it again.')
@@ -65,7 +71,7 @@ export function startWatching(folder: FileSystemDirectoryHandle) {
   generation++
   clearInterval(timer)
   current = folder
-  set({ phase: 'watching', folder: folder.name, checkedAt: null, found: 0 })
+  set({ phase: 'watching', folder: folder.name, checkedAt: null, session: [] })
   void check()
   timer = setInterval(() => void check(), CHECK_EVERY_MS)
 }
