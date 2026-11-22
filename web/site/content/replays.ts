@@ -38,16 +38,16 @@ export const replays: Page = {
     {
       id: 'how-long',
       heading: 'How long replays last',
-      html: `<p>Epic says you can only play a replay in the version of Fortnite that recorded it. After an update, older replays stop being valid unless you saved them. You save a replay by renaming it in the replay browser.</p><p>On PC, Epic says the number of saved replays is unlimited. PlayStation and Xbox allow 10. A replay of a full match is about 10 MB.</p><p>We could not find how many unsaved replays Fortnite keeps on PC or when it clears them. Import your matches soon after you play, and before the next game update. ${link('/auto-track/', 'Auto tracking')} does that for you while a tab is open.</p>${cite('epic-replays')}`,
+      html: `<p>Epic says you can only play a replay in the version of Fortnite that recorded it. After an update, older replays stop being valid unless you saved them. You save a replay by renaming it in the replay browser.</p><p>On PC, Epic says the number of saved replays is unlimited. PlayStation and Xbox allow 10. A replay of a full match is about 10 MB.</p><p>We could not find how many unsaved replays Fortnite keeps on PC or when it clears them. Add your matches soon after you play, and before the next game update.</p>${cite('epic-replays')}`,
     },
     {
       id: 'use-chest-log',
       heading: 'Point Chest Log at the folder',
       html: `${steps([
-        { title: 'Open Chest Log', body: `Go to ${link(SITE.app.track, 'the tracker')} and choose your replay folder.` },
+        { title: 'Open Chest Log', body: `On your PC, choose ${link(SITE.app.track, 'Count my chests')} and pick your replay folder.` },
         { title: 'Open the Demos folder', body: `In the window that opens, paste ${pathCode(SITE.demosPath)} into the address bar, press Enter, then select the folder.` },
         { title: 'Wait for the import', body: 'Chest Log takes about two seconds for each replay file. Keep the tab open while it works.' },
-      ])}<p>Chrome and Edge remember the folder. In other browsers you can pick the files or drop the folder onto the page each time.</p>`,
+      ])}<p>After you play, choose the folder again. Chest Log skips the matches it already counted.</p>`,
     },
     {
       id: 'contents',
@@ -64,5 +64,5 @@ export const replays: Page = {
       a: `Epic says PC can keep an unlimited number of saved replays and that replays from an older game version stop being valid after an update unless you saved them. We could not find a limit for unsaved replays.`,
     },
   ],
-  related: ['auto-track', 'treasure-hunters-odds', 'privacy', 'faq'],
+  related: ['treasure-hunters-odds', 'privacy', 'faq'],
 }

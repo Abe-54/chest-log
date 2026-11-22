@@ -1,6 +1,6 @@
 import { Store } from '@tanstack/store'
 import { base } from '~/lib/mode'
-import { clearLibrary, getValue, setValue, type LibraryMeta } from './db'
+import { clearLibrary, getValue, type LibraryMeta } from './db'
 import type { Job, Report } from './worker'
 import workerUrl from './worker.ts?worker&url'
 
@@ -82,30 +82,6 @@ export async function importReplays(picked: File[]): Promise<ImportOutcome | und
     set({ phase: 'error', message: error instanceof Error ? error.message : String(error) })
   }
 }
-
-export const canPickFolder = typeof window !== 'undefined' && 'showDirectoryPicker' in window
-
-export async function filesIn(folder: FileSystemDirectoryHandle) {
-  const files: File[] = []
-  for await (const entry of folder.values()) {
-    if (entry.kind === 'file' && isReplay(entry)) files.push(await (entry as FileSystemFileHandle).getFile())
-  }
-  return files
-}
-
-/** Chromium only: asks for the Demos folder and remembers it, so later visits can watch it without asking again. */
-export async function chooseFolder() {
-  try {
-    const folder = await window.showDirectoryPicker({ id: 'fortnite-demos', mode: 'read' })
-    await setValue('folder', folder)
-    return folder
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') return undefined
-    throw error
-  }
-}
-
-export const rememberedFolder = () => getValue('folder').catch(() => undefined)
 
 /** Files and folders dropped on the page. */
 export async function droppedFiles(items: DataTransferItemList) {

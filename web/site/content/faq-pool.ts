@@ -31,7 +31,7 @@ export const FAQ_POOL = {
   },
   browser: {
     q: 'Which browsers work?',
-    a: `Any current browser can import replay files. Chrome and Edge can also remember your replay folder, which ${link('/auto-track/', 'auto tracking')} needs. In Firefox and Safari you choose the files again each visit.`,
+    a: `Any current desktop browser: Chrome, Edge, Firefox or Safari. You choose your replay folder after you play, and Chest Log skips matches it already counted.`,
   },
   missing: {
     q: 'Why are some of my matches missing?',
@@ -60,6 +60,10 @@ export const FAQ_POOL = {
   quests: {
     q: 'Why not use the Quests tab in Fortnite?',
     a: `Players report that the in-game chest quest shows one running total with no history by match, and that it stops counting at a cap, commonly given as 1,000. We could not find Epic documentation for that cap, so check your own Quests tab. Chest Log keeps a count for every match you have a replay for.`,
+  },
+  newMatches: {
+    q: 'How do I add new matches?',
+    a: `After you play, open Chest Log and choose your Demos folder again. Matches it already counted are skipped, so only the new ones are read. Browsers do not let a website watch that folder on its own, because Windows keeps it inside AppData.`,
   },
   speed: {
     q: 'How long does an import take?',

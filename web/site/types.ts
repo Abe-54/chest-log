@@ -10,13 +10,12 @@ export type Section = {
   heading: string
   html: string
   /** Short caps line above the heading. */
-  eyebrow?: string
   /** HTML set beside the heading on wide screens. */
   aside?: string
 }
 
-/** The home page hero. The h1 ends with `accent`, which is drawn in gold. */
-export type Hero = { eyebrow: string; accent: string; note: string }
+/** The home page hero: a one-line promise under the buttons, and a note phones see because replays live on a PC. */
+export type Hero = { promise: string; note: string }
 
 export type Cta = { label: string; href: string; kind: 'primary' | 'secondary' }
 

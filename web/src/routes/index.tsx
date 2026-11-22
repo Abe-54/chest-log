@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { ArrowRight } from 'lucide-react'
@@ -68,12 +68,12 @@ function WeekPage() {
       <div className="mt-6 grid grid-cols-2 gap-2.5 md:mt-10 lg:grid-cols-5 lg:gap-3.5">
         <Card rarity="mythic" index={0} wide label="By you" value={week.total.toLocaleString()}
           note={<><span className="num">{week.opened.toLocaleString()} opened</span><span className="max-lg:hidden"> · </span><span className="num max-lg:block">{week.broken.toLocaleString()} broken</span></>} />
-        <Card rarity="legendary" index={1} label="Best match" value={String(best?.chests ?? '–')} note={best ? `${monthDay(best.startUtc)} · ${timeOfDay(best.startUtc)}` : undefined}
+        <Card rarity="common" index={1} label="Best match" value={String(best?.chests ?? '–')} note={best ? `${monthDay(best.startUtc)} · ${timeOfDay(best.startUtc)}` : undefined}
           link={best && { matchId: best.id, label: `Best match: ${best.chests} chests. Replay it` }} />
-        <Card rarity="epic" index={2} label={<><span className="lg:hidden">Teammates</span><span className="max-lg:hidden">Teammate chests</span></>} value={teamTotal.toLocaleString()}
+        <Card rarity="common" index={2} label={<><span className="lg:hidden">Teammates</span><span className="max-lg:hidden">Teammate chests</span></>} value={teamTotal.toLocaleString()}
           note={<><span className="num max-lg:hidden">{week.team.opened.toLocaleString()} opened · </span><span className="num">{week.team.broken.toLocaleString()} broken</span></>} />
-        <Card rarity="rare" index={3} label="Per match" value={decimal(week.average)} note={<>average<span className="max-lg:hidden"> over {week.realMatches}</span></>} />
-        <Card rarity="uncommon" index={4} label="Per minute" value={decimal(week.pace)} note="while alive" />
+        <Card rarity="common" index={3} label="Per match" value={decimal(week.average)} note={<>average<span className="max-lg:hidden"> over {week.realMatches}</span></>} />
+        <Card rarity="common" index={4} label="Per minute" value={decimal(week.pace)} note="while alive" />
       </div>
 
       <section className="mt-6 rounded-panel border border-line bg-ink-sunk p-5 md:mt-8 md:p-7" aria-labelledby="per-match">
@@ -198,7 +198,7 @@ function Card({ label, value, note, rarity, index, wide, link }: {
 }) {
   const body = (
     <>
-      <p className={cn('caps text-[12px] md:text-caps', rarities[rarity].text)}>{label}</p>
+      <p className={cn('caps text-[13px] md:text-sm', rarity === 'mythic' ? rarities[rarity].text : 'text-mist')}>{label}</p>
       <p className={cn('flex gap-x-4 gap-y-1.5', wide ? 'items-end justify-between lg:flex-col lg:items-start' : 'flex-col')}>
         <span className={cn('display num leading-[0.92] lg:text-[58px]', wide ? 'text-[50px]' : 'text-[44px]')}>{value}</span>
         {note && <span className={cn('text-[14px] text-mist-2 md:text-[15px] lg:text-sm', wide && 'max-lg:text-right')}>{note}</span>}
@@ -206,10 +206,10 @@ function Card({ label, value, note, rarity, index, wide, link }: {
     </>
   )
   const style = cn('rarity-wash flex flex-col gap-1.5 px-5 py-[18px] motion-safe:animate-[card-in_320ms_var(--ease-pop)_both]', wide && 'col-span-2 lg:col-span-1')
-  const delay = { ...rarityStyle(rarity), animationDelay: `${index * 60}ms` }
+  const delay = { ...rarityStyle(rarity), ...(rarity === 'common' && { '--r': 'var(--color-line-strong)' }), animationDelay: `${index * 60}ms` } as CSSProperties
   return link
     ? <Link to="/matches/$matchId" params={{ matchId: link.matchId }} aria-label={link.label} style={delay}
-        className={cn(style, 'transition-[translate,border-color] duration-160 ease-out hover:-translate-y-0.5 hover:border-[color-mix(in_oklab,var(--r)_60%,transparent)]')}>{body}</Link>
+        className={cn(style, 'transition-[border-color] duration-160 ease-out hover:border-gold')}>{body}</Link>
     : <div style={delay} className={style}>{body}</div>
 }
 

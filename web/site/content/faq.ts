@@ -14,5 +14,5 @@ export const faq: Page = {
   breadcrumbs: [],
   sections: [],
   faq: allFaq(),
-  related: ['treasure-hunters-odds', 'fortnite-replay-files', 'treasure-hours', 'auto-track', 'privacy'],
+  related: ['treasure-hunters-odds', 'fortnite-replay-files', 'treasure-hours', 'privacy'],
 }

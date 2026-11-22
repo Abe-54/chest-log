@@ -1,6 +1,5 @@
 @import 'tailwindcss';
-@import '@fontsource/barlow-condensed/800-italic.css';
-@import '@fontsource/barlow-condensed/900-italic.css';
+@import '@fontsource/barlow-condensed/800.css';
 @import '@fontsource/barlow/400.css';
 @import '@fontsource/barlow/500.css';
 @import '@fontsource/barlow/600.css';
@@ -8,43 +7,43 @@
 @import '@fontsource/barlow/800.css';
 @import '@fontsource/jetbrains-mono/500.css';
 
-/* Storm Night. Every text color was measured against ink, ink-2 and ink-3 for WCAG AA. */
+/* Open Water, the same palette as the site. Every text color was measured against ink, ink-2 and ink-3 for WCAG AA. */
 @theme {
   --font-display: 'Barlow Condensed', ui-sans-serif, sans-serif;
   --font-sans: 'Barlow', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
-  --color-ink: #110b22;
-  --color-ink-2: #1a1233;
-  --color-ink-3: #251b47;
-  --color-ink-sunk: #160f2e;
-  --color-ink-deep: #0b0717;
-  --color-ink-glass: rgb(17 11 34 / 0.94);
+  --color-ink: #082f5c;
+  --color-ink-2: #0b386b;
+  --color-ink-3: #114580;
+  --color-ink-sunk: #072a52;
+  --color-ink-deep: #052244;
+  --color-ink-glass: rgb(8 47 92 / 0.94);
 
-  --color-line: #3b2d6b;
-  --color-line-soft: #2a2147;
-  --color-line-strong: #5b4a92;
+  --color-line: #24578e;
+  --color-line-soft: #18497c;
+  --color-line-strong: #3d72aa;
 
-  --color-bone: #ffffff;
-  --color-prose: #e4def7;
-  --color-mist: #c9c0ea;
-  --color-mist-2: #b3a9d6;
-  --color-dim: #9c93bf;
+  --color-bone: #f4f8fc;
+  --color-prose: #dde9f5;
+  --color-mist: #b8cfe6;
+  --color-mist-2: #a9c4e0;
+  --color-dim: #9fbfe0;
 
-  --color-gold: #ffc23d;
-  --color-gold-deep: #e8a317;
-  --color-coral: #ff6b5a;
+  --color-gold: #ffc83d;
+  --color-gold-deep: #ffd76e;
+  --color-coral: #ff7a6b;
   --color-kelp: #5edc8a;
-  /* Fill only: storm measures 3.4:1 on ink, so storm-ring carries storm text. */
-  --color-storm: #7a3cf0;
-  --color-storm-ring: #c7a6ff;
-  --color-storm-deep: #3a1d7a;
-  --color-storm-glow: rgb(122 60 240 / 0.4);
+  /* The sea: the site's own blue. Fill only under white text; sea-ring carries sea-colored text and rings. */
+  --color-storm: #1a65ad;
+  --color-storm-ring: #8cc0f2;
+  --color-storm-deep: #0d4f94;
+  --color-storm-glow: rgb(26 101 173 / 0.45);
 
   --color-live: #52c234;
   --color-live-line: #2f5a3e;
 
-  --color-water: #101a3c;
+  --color-water: #0d4f94;
   --color-island: #1f4a3c;
   --color-island-edge: #4fa77a;
 
@@ -77,7 +76,6 @@
   --text-lead--line-height: 1.4545;
   --text-caps: 0.8125rem;
   --text-caps--line-height: 1.23;
-  --text-caps--letter-spacing: 0.12em;
 
   --radius-button: 8px;
   --radius-card: 10px;
@@ -86,13 +84,13 @@
   --radius-sheet: 16px;
   --radius-pill: 999px;
 
-  --text-shadow-numeral: 0 8px 0 #3a1d7a;
-  --text-shadow-numeral-sm: 0 6px 0 #3a1d7a;
-  --text-shadow-word: 0 5px 0 #3a1d7a;
+  --text-shadow-numeral: 0 8px 0 #04213f;
+  --text-shadow-numeral-sm: 0 6px 0 #04213f;
+  --text-shadow-word: 0 5px 0 #04213f;
   --shadow-glow-gold: 0 0 40px rgb(255 194 61 / 0.35);
   --shadow-live: 0 0 0 4px rgb(82 194 52 / 0.25);
-  --shadow-panel: 0 24px 60px -24px rgb(5 2 15 / 0.8);
-  --shadow-popover: 0 12px 32px -8px rgb(5 2 15 / 0.9);
+  --shadow-panel: 0 24px 60px -24px rgb(2 18 40 / 0.8);
+  --shadow-popover: 0 12px 32px -8px rgb(2 18 40 / 0.9);
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
@@ -130,19 +128,15 @@
 
 @utility display {
   font-family: var(--font-display);
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase;
-  letter-spacing: -0.005em;
-  line-height: 0.92;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 0.94;
 }
 @utility caps {
   font-family: var(--font-sans);
-  font-size: var(--text-caps);
-  line-height: var(--text-caps--line-height);
+  font-size: 0.875rem;
+  line-height: 1.3;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 /* App pages: 56px gutter on a 1440 canvas, 16px on a phone. */
 @utility page {
@@ -154,13 +148,11 @@
     padding-inline: 3.5rem;
   }
 }
-/* A stat or loot card tinted by a rarity fill set in --r. */
+/* A stat or loot card. Rarity shows as a thin top rule, the way the game marks loot, not as a tinted card. */
 @utility rarity-wash {
   background-color: var(--color-ink-2);
-  background-image: linear-gradient(180deg, color-mix(in oklab, var(--r) 28%, transparent) 0%, color-mix(in oklab, var(--r) 6%, transparent) 75%);
   border: 1px solid var(--color-line);
-  border-top: 4px solid var(--r);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--r) 35%, transparent);
+  border-top: 3px solid var(--r);
   border-radius: var(--radius-card);
 }
 @utility num {

@@ -1,21 +1,18 @@
 import { createRootRouteWithContext, HeadContent, Link, Outlet, redirect, useMatchRoute } from '@tanstack/react-router'
 import { useQuery, type QueryClient } from '@tanstack/react-query'
-import { useSelector } from '@tanstack/react-store'
 import { Toaster } from 'sonner'
 import { isMissing, weekQuery } from '~/lib/queries'
 import { base, demo, hosted } from '~/lib/mode'
-import { useNow } from '~/lib/now'
 import { cn } from '~/lib/cn'
-import { LiveDot, StatusPill } from '~/components/live'
+import { LiveDot } from '~/components/live'
 import { DISCLAIMER, TabGlyph, Wordmark, type Glyph } from '~/components/brand'
-import { watchStore } from '~/library/watch'
 
 interface Tab { to: '/' | '/matches' | '/track' | '/clips'; label: string; glyph: Glyph; exact: boolean }
 const week: Tab = { to: '/', label: 'Week', glyph: 'diamond', exact: true }
 const matches: Tab = { to: '/matches', label: 'Matches', glyph: 'circle', exact: false }
-// Clips are this PC's own recordings and Auto-track reads a folder in the browser, so each build has one of them.
+// Clips are this PC's own recordings and Add matches reads a folder in the browser, so each build has one of them.
 const tabs: Tab[] = hosted
-  ? [week, matches, { to: '/track', label: 'Auto-track', glyph: 'square', exact: false }]
+  ? [week, matches, { to: '/track', label: 'Add matches', glyph: 'square', exact: false }]
   : [week, matches, { to: '/clips', label: 'Clips', glyph: 'square', exact: false }]
 
 const library = (queryClient: QueryClient) => queryClient.ensureQueryData(weekQuery).catch(error => {
@@ -60,7 +57,7 @@ function Shell() {
             </nav>
           )}
           <div className="col-start-2 justify-self-end md:col-start-3">
-            {!hosted ? <LiveDot /> : demo ? <CountButton /> : week && <WatchPill />}
+            {!hosted ? <LiveDot /> : demo ? <CountButton /> : week && <AddButton />}
           </div>
         </div>
       </header>
@@ -97,12 +94,13 @@ function Shell() {
   )
 }
 
-function WatchPill() {
-  const watch = useSelector(watchStore, state => state)
-  const now = useNow(1000)
-  if (watch.phase !== 'watching') return <StatusPill phase="idle" word="Not watching" to="/track" />
-  const checked = watch.checkedAt === null ? 'checking now' : `checked ${Math.max(0, Math.round((now - watch.checkedAt) / 1000))}s ago`
-  return <StatusPill phase="watching" word="Watching" detail={`${watch.folder} · ${checked}`} to="/track" />
+/** Browsers cannot watch the Demos folder, so after a session the header offers the one click that adds new matches. */
+function AddButton() {
+  return (
+    <Link to="/track" className="press display flex h-9 items-center rounded-button border-2 border-gold px-3 text-lg text-gold hover:bg-gold hover:text-ink md:h-11 md:px-4 md:text-xl">
+      Add<span className="max-md:hidden">&nbsp;new matches</span>
+    </Link>
+  )
 }
 
 /** The demo has no folder to watch, so its header points at counting your own. */
