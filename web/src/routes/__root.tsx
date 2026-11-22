@@ -1,35 +1,37 @@
-import { createRootRouteWithContext, HeadContent, Link, Outlet, redirect, useRouterState } from '@tanstack/react-router'
+import { createRootRouteWithContext, HeadContent, Link, Outlet, redirect, useMatchRoute } from '@tanstack/react-router'
 import { useQuery, type QueryClient } from '@tanstack/react-query'
-import { Clapperboard, Gem, PartyPopper, Plus, Route as RouteIcon, Swords } from 'lucide-react'
+import { useSelector } from '@tanstack/react-store'
 import { Toaster } from 'sonner'
-import { hosted, isMissing, weekQuery } from '~/lib/queries'
+import { isMissing, weekQuery } from '~/lib/queries'
+import { base, demo, hosted } from '~/lib/mode'
+import { useNow } from '~/lib/now'
 import { cn } from '~/lib/cn'
-import { LiveDot } from '~/components/live'
+import { LiveDot, StatusPill } from '~/components/live'
+import { DISCLAIMER, TabGlyph, Wordmark, type Glyph } from '~/components/brand'
+import { watchStore } from '~/library/watch'
 
-const everyTab = [
-  { to: '/', label: 'Week', icon: Gem, exact: true },
-  { to: '/matches', label: 'Matches', icon: Swords, exact: false },
-  { to: '/routes', label: 'Routes', icon: RouteIcon, exact: false },
-  { to: '/clips', label: 'Clips', icon: Clapperboard, exact: false },
-  { to: '/wrapped', label: 'Wrapped', icon: PartyPopper, exact: false },
-] as const
-// Clips are this PC's own recordings, so a hosted library has no Clips page.
-const tabs = everyTab.filter(tab => !hosted || tab.to !== '/clips')
+interface Tab { to: '/' | '/matches' | '/track' | '/clips'; label: string; glyph: Glyph; exact: boolean }
+const week: Tab = { to: '/', label: 'Week', glyph: 'diamond', exact: true }
+const matches: Tab = { to: '/matches', label: 'Matches', glyph: 'circle', exact: false }
+// Clips are this PC's own recordings and Auto-track reads a folder in the browser, so each build has one of them.
+const tabs: Tab[] = hosted
+  ? [week, matches, { to: '/track', label: 'Auto-track', glyph: 'square', exact: false }]
+  : [week, matches, { to: '/clips', label: 'Clips', glyph: 'square', exact: false }]
 
 const library = (queryClient: QueryClient) => queryClient.ensureQueryData(weekQuery).catch(error => {
-  if (hosted && isMissing(error)) return null
+  if (hosted && !demo && isMissing(error)) return null
   throw error
 })
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ context, location }) => {
-    if (hosted && location.pathname !== '/import' && !(await library(context.queryClient))) throw redirect({ to: '/import' })
+    if (hosted && !demo && location.pathname !== '/track' && !(await library(context.queryClient))) throw redirect({ to: '/track' })
   },
   loader: ({ context }) => library(context.queryClient),
   head: () => ({ meta: [{ title: 'Chest Log' }] }),
   component: Shell,
   errorComponent: ({ error }) => (
-    <main className="mx-auto max-w-xl px-4 py-16">
+    <main className="page py-16">
       <p className="display text-4xl text-coral">Couldn’t load the logbook</p>
       <p className="mt-3 text-mist">{error instanceof Error ? error.message : String(error)}.{hosted ? ' Reload the page to try again.' : ' The local server may be off.'}</p>
     </main>
@@ -39,41 +41,51 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function Shell() {
   // Read from the query cache, not the loader result, so the shell fills in the moment a first import lands.
   const { data: week } = useQuery(weekQuery)
-  const immersive = useRouterState({ select: state => state.location.pathname.startsWith('/wrapped') })
+  // A match replay brings its own back link on a phone, so the app bar steps aside there.
+  const onMatch = !!useMatchRoute()({ to: '/matches/$matchId' })
   return (
-    <div className="min-h-dvh">
+    <div className="flex min-h-dvh flex-col">
       <HeadContent />
-      {!immersive && (
-        <header className="sticky top-0 z-40 border-b border-line/60 bg-ink/85 backdrop-blur-md">
-          <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4">
-            <Link to="/" className="display-wide text-[15px] text-gold">CHEST LOG</Link>
-            <nav aria-label="Main" className="hidden flex-1 items-center gap-1 md:flex">
-              {week && tabs.map(tab => (
+      <header className={cn('sticky top-0 z-40 border-b border-line-soft bg-ink-glass backdrop-blur-md', onMatch && 'max-md:hidden')}>
+        <div className="page grid h-14 grid-cols-[1fr_auto] items-center gap-6 md:h-20 md:grid-cols-[1fr_auto_1fr]">
+          <Link to="/" aria-label="Chest Log, your week" className="justify-self-start"><Wordmark /></Link>
+          {week && (
+            <nav aria-label="Main" className="hidden items-center gap-10 md:flex">
+              {tabs.map(tab => (
                 <Link key={tab.to} to={tab.to} activeOptions={{ exact: tab.exact, includeSearch: false }}
-                  className="press rounded-full px-3.5 py-1.5 text-sm font-medium text-mist hover:text-bone data-[status=active]:bg-ink-3 data-[status=active]:text-bone">
+                  className="relative py-2 text-base font-semibold text-mist hover:text-bone data-[status=active]:text-bone data-[status=active]:after:absolute data-[status=active]:after:inset-x-0 data-[status=active]:after:-bottom-1.5 data-[status=active]:after:h-[3px] data-[status=active]:after:rounded-pill data-[status=active]:after:bg-gold">
                   {tab.label}
                 </Link>
               ))}
             </nav>
-            <span className="ml-auto flex items-center gap-2 text-sm text-mist">
-              {hosted
-                ? week && <Link to="/import" className="press flex h-8 items-center gap-1.5 rounded-full border border-line px-3 text-[13px] font-semibold text-bone hover:border-mist"><Plus className="size-3.5" strokeWidth={2.6} aria-hidden />Add replays</Link>
-                : <LiveDot />}
-              {week?.player}
-            </span>
+          )}
+          <div className="col-start-2 justify-self-end md:col-start-3">
+            {!hosted ? <LiveDot /> : demo ? <CountButton /> : week && <WatchPill />}
           </div>
-        </header>
+        </div>
+      </header>
+      {demo && (
+        <div className="border-b border-gold/25 bg-gold/10">
+          <p className="page flex flex-wrap items-center gap-x-3 gap-y-1 py-2.5 text-sm">
+            <b className="font-bold text-gold">Demo library</b>
+            <span className="text-mist">Sample matches from one player, with every name replaced.</span>
+            <a href={`${base}track`} className="font-semibold text-bone underline decoration-gold/60 underline-offset-4 hover:text-gold sm:ml-auto">Add your own replays</a>
+          </p>
+        </div>
       )}
-      <div className={cn(!immersive && 'pb-24 md:pb-10')}>
+      <div className="flex-1">
         <Outlet />
       </div>
-      {!immersive && week && (
-        <nav aria-label="Main" className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line/60 bg-ink/92 backdrop-blur-md md:hidden">
+      <footer className="page pt-10 pb-28 md:pb-10">
+        <p className="border-t border-line-soft pt-6 text-[13px] text-dim">{DISCLAIMER}</p>
+      </footer>
+      {week && (
+        <nav aria-label="Main" className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line-soft bg-ink-glass pt-2.5 backdrop-blur-md md:hidden">
           <div className="grid auto-cols-fr grid-flow-col">
-            {tabs.map(({ to, label, icon: Icon, exact }) => (
+            {tabs.map(({ to, label, glyph, exact }) => (
               <Link key={to} to={to} activeOptions={{ exact, includeSearch: false }}
-                className="press group flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-dim data-[status=active]:text-gold">
-                <Icon className="size-5" strokeWidth={2.2} aria-hidden />
+                className="press group flex min-h-12 flex-col items-center justify-center gap-1 text-xs font-semibold text-mist-2 data-[status=active]:font-bold data-[status=active]:text-bone">
+                <TabGlyph shape={glyph} />
                 {label}
               </Link>
             ))}
@@ -82,5 +94,22 @@ function Shell() {
       )}
       <Toaster theme="dark" position="top-center" toastOptions={{ className: '!bg-ink-3 !border-line !text-bone' }} />
     </div>
+  )
+}
+
+function WatchPill() {
+  const watch = useSelector(watchStore, state => state)
+  const now = useNow(1000)
+  if (watch.phase !== 'watching') return <StatusPill phase="idle" word="Not watching" to="/track" />
+  const checked = watch.checkedAt === null ? 'checking now' : `checked ${Math.max(0, Math.round((now - watch.checkedAt) / 1000))}s ago`
+  return <StatusPill phase="watching" word="Watching" detail={`${watch.folder} · ${checked}`} to="/track" />
+}
+
+/** The demo has no folder to watch, so its header points at counting your own. */
+function CountButton() {
+  return (
+    <a href={`${base}track`} className="press display flex h-9 items-center rounded-button border-2 border-gold px-3 text-lg text-gold hover:bg-gold hover:text-ink md:h-11 md:px-4 md:text-xl">
+      Count<span className="max-md:hidden">&nbsp;my chests</span>
+    </a>
   )
 }

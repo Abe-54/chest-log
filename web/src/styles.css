@@ -1,30 +1,103 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/anybody/wdth.css';
-@import '@fontsource-variable/schibsted-grotesk/index.css';
+@import '@fontsource/barlow-condensed/800-italic.css';
+@import '@fontsource/barlow-condensed/900-italic.css';
+@import '@fontsource/barlow/400.css';
+@import '@fontsource/barlow/500.css';
+@import '@fontsource/barlow/600.css';
+@import '@fontsource/barlow/700.css';
+@import '@fontsource/barlow/800.css';
+@import '@fontsource/jetbrains-mono/500.css';
 
+/* Storm Night. Every text color was measured against ink, ink-2 and ink-3 for WCAG AA. */
 @theme {
-  --font-display: 'Anybody Variable', ui-sans-serif, sans-serif;
-  --font-sans: 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Barlow Condensed', ui-sans-serif, sans-serif;
+  --font-sans: 'Barlow', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
-  --color-ink: oklch(0.17 0.022 245);
-  --color-ink-2: oklch(0.205 0.026 245);
-  --color-ink-3: oklch(0.255 0.03 245);
-  --color-line: oklch(0.33 0.03 245);
-  --color-bone: oklch(0.95 0.014 85);
-  --color-mist: oklch(0.74 0.022 245);
-  --color-dim: oklch(0.58 0.025 245);
-  --color-gold: oklch(0.83 0.15 80);
-  --color-gold-deep: oklch(0.68 0.14 70);
-  --color-coral: oklch(0.71 0.165 32);
-  --color-kelp: oklch(0.8 0.13 158);
-  --color-storm: oklch(0.66 0.15 300);
+  --color-ink: #110b22;
+  --color-ink-2: #1a1233;
+  --color-ink-3: #251b47;
+  --color-ink-sunk: #160f2e;
+  --color-ink-deep: #0b0717;
+  --color-ink-glass: rgb(17 11 34 / 0.94);
+
+  --color-line: #3b2d6b;
+  --color-line-soft: #2a2147;
+  --color-line-strong: #5b4a92;
+
+  --color-bone: #ffffff;
+  --color-prose: #e4def7;
+  --color-mist: #c9c0ea;
+  --color-mist-2: #b3a9d6;
+  --color-dim: #9c93bf;
+
+  --color-gold: #ffc23d;
+  --color-gold-deep: #e8a317;
+  --color-coral: #ff6b5a;
+  --color-kelp: #5edc8a;
+  /* Fill only: storm measures 3.4:1 on ink, so storm-ring carries storm text. */
+  --color-storm: #7a3cf0;
+  --color-storm-ring: #c7a6ff;
+  --color-storm-deep: #3a1d7a;
+  --color-storm-glow: rgb(122 60 240 / 0.4);
+
+  --color-live: #52c234;
+  --color-live-line: #2f5a3e;
+
+  --color-water: #101a3c;
+  --color-island: #1f4a3c;
+  --color-island-edge: #4fa77a;
+
+  --color-rarity-common: #a9b1be;
+  --color-rarity-uncommon: #52c234;
+  --color-rarity-rare: #2e8bff;
+  --color-rarity-epic: #a54bf2;
+  --color-rarity-legendary: #f7a531;
+  --color-rarity-mythic: #ffd84a;
+  --color-rarity-common-text: #a9b1be;
+  --color-rarity-uncommon-text: #6fd94f;
+  --color-rarity-rare-text: #6fb0ff;
+  --color-rarity-epic-text: #c58bff;
+  --color-rarity-legendary-text: #f7a531;
+  --color-rarity-mythic-text: #ffd84a;
+
+  --text-hero: 13.125rem;
+  --text-hero--line-height: 0.876;
+  --text-hero-sm: 7.75rem;
+  --text-hero-sm--line-height: 0.9;
+  --text-display-xl: 7.75rem;
+  --text-display-xl--line-height: 0.84;
+  --text-display-lg: 4rem;
+  --text-display-lg--line-height: 0.94;
+  --text-display-md: 2.25rem;
+  --text-display-md--line-height: 1;
+  --text-display-sm: 1.75rem;
+  --text-display-sm--line-height: 1;
+  --text-lead: 1.375rem;
+  --text-lead--line-height: 1.4545;
+  --text-caps: 0.8125rem;
+  --text-caps--line-height: 1.23;
+  --text-caps--letter-spacing: 0.12em;
+
+  --radius-button: 8px;
+  --radius-card: 10px;
+  --radius-table: 12px;
+  --radius-panel: 14px;
+  --radius-sheet: 16px;
+  --radius-pill: 999px;
+
+  --text-shadow-numeral: 0 8px 0 #3a1d7a;
+  --text-shadow-numeral-sm: 0 6px 0 #3a1d7a;
+  --text-shadow-word: 0 5px 0 #3a1d7a;
+  --shadow-glow-gold: 0 0 40px rgb(255 194 61 / 0.35);
+  --shadow-live: 0 0 0 4px rgb(82 194 52 / 0.25);
+  --shadow-panel: 0 24px 60px -24px rgb(5 2 15 / 0.8);
+  --shadow-popover: 0 12px 32px -8px rgb(5 2 15 / 0.9);
 
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-
-  --text-hero: 5.5rem;
-  --text-hero--line-height: 0.85;
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @layer base {
@@ -38,42 +111,72 @@
   body {
     min-height: 100dvh;
     font-family: var(--font-sans);
-    line-height: 1.55;
-    font-feature-settings: 'tnum' 0;
+    font-weight: 500;
+    line-height: 1.5;
+    /* Pixel-placed so the glow stays put on tall pages. */
+    background: radial-gradient(420px 420px at 300px 140px, var(--color-storm-glow), transparent) no-repeat, var(--color-ink);
+    @media (width >= 48rem) {
+      background: radial-gradient(900px 700px at 1100px 260px, var(--color-storm-glow), transparent) no-repeat, var(--color-ink);
+    }
   }
   :focus-visible {
     outline: 2px solid var(--color-gold);
     outline-offset: 2px;
   }
   ::selection {
-    background: oklch(0.83 0.15 80 / 0.35);
+    background: rgb(255 194 61 / 0.35);
   }
 }
 
 @utility display {
   font-family: var(--font-display);
-  font-variation-settings: 'wdth' 62;
-  font-weight: 820;
-  letter-spacing: -0.01em;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
   line-height: 0.92;
 }
-@utility display-wide {
-  font-family: var(--font-display);
-  font-variation-settings: 'wdth' 140;
-  font-weight: 760;
-  letter-spacing: 0.02em;
+@utility caps {
+  font-family: var(--font-sans);
+  font-size: var(--text-caps);
+  line-height: var(--text-caps--line-height);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+/* App pages: 56px gutter on a 1440 canvas, 16px on a phone. */
+@utility page {
+  width: 100%;
+  max-width: 90rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (width >= 64rem) {
+    padding-inline: 3.5rem;
+  }
+}
+/* A stat or loot card tinted by a rarity fill set in --r. */
+@utility rarity-wash {
+  background-color: var(--color-ink-2);
+  background-image: linear-gradient(180deg, color-mix(in oklab, var(--r) 28%, transparent) 0%, color-mix(in oklab, var(--r) 6%, transparent) 75%);
+  border: 1px solid var(--color-line);
+  border-top: 4px solid var(--r);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--r) 35%, transparent);
+  border-radius: var(--radius-card);
 }
 @utility num {
   font-variant-numeric: tabular-nums;
 }
 @utility press {
-  transition: transform 140ms var(--ease-out), background-color 160ms ease, color 160ms ease;
+  transition: transform 140ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease;
   &:active {
     transform: scale(0.97);
   }
 }
 @utility safe-bottom {
   padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+}
+@utility no-scrollbar {
+  scrollbar-width: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -86,12 +189,26 @@
 }
 
 @keyframes caption-in {
-  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  from { opacity: 0; transform: translateY(4px); }
 }
 
-@keyframes draw {
-  from { stroke-dashoffset: 1; }
-  to { stroke-dashoffset: 0; }
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(12px); }
+}
+
+@keyframes bar-grow {
+  from { transform: scaleY(0); }
+}
+
+@keyframes live-ping {
+  from { box-shadow: 0 0 0 0 rgb(82 194 52 / 0.45); }
+  to { box-shadow: 0 0 0 8px rgb(82 194 52 / 0); }
+}
+
+@keyframes pin-pop {
+  0% { transform: scale(0) rotate(45deg); }
+  70% { transform: scale(1.25) rotate(45deg); }
+  100% { transform: scale(1) rotate(45deg); }
 }
 
 @keyframes chest-pop {
@@ -112,4 +229,9 @@
 @keyframes scan {
   from { transform: translateX(-100%); }
   to { transform: translateX(300%); }
+}
+
+@keyframes ring-down {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: var(--ring); }
 }

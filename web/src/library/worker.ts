@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-import type { ChestRegistry, ReplayIndex, ReplayMatch } from '../../../data/types'
+import type { ReplayIndex, ReplayMatch } from '../../../data/types'
 import type { Calibration } from '../../pipeline/domain/model'
 import { buildDataset } from '../../pipeline/dataset'
 import { HEADER_BYTES, parseHeader } from '../../live/parse-header.mjs'
@@ -71,13 +71,13 @@ async function build(timeZone: string) {
   const failed = records.filter((record): record is Extract<ReplayRecord, { error: string }> => 'error' in record)
   exports.Reset()
   for (const record of records) if ('pending' in record) exports.AddPending(record.pending)
-  const { index, chests } = JSON.parse(exports.Complete(JSON.stringify(
+  const { index } = JSON.parse(exports.Complete(JSON.stringify(
     failed.map(record => ({ id: idOf(record.name), file: record.name, error: record.error })),
-  ))) as { index: ReplayIndex; chests: ChestRegistry }
+  ))) as { index: ReplayIndex }
   if (!index.matches.some(row => !row.error && !row.stub)) throw new Error('None of those files held a finished match.')
   const replays = index.matches.filter(row => !row.error).map(row => JSON.parse(exports.TakeMatch(row.id)) as ReplayMatch)
   const builtAt = new Date().toISOString()
-  const dataset = buildDataset({ index, registry: chests, calibration: calibration as Calibration, replays, generatedAt: builtAt })
+  const dataset = buildDataset({ index, calibration: calibration as Calibration, replays, generatedAt: builtAt })
   const meta: LibraryMeta = { replays: replays.length, failed: failed.map(record => ({ name: record.name, error: record.error })), builtAt }
   await writeDataset(dataset, meta)
   report({ type: 'built', meta, total: dataset.week.total })

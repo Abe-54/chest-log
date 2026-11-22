@@ -32,16 +32,6 @@ export interface ClipIndex {
 
 export const hasChestOpening = (clip: Clip) => clip.events.some(event => isChest({ kind: event.type }));
 
-export function standoutClip(clips: readonly Clip[]) {
-  const rank = (clip: Clip) => {
-    if (!hasChestOpening(clip)) return 0;
-    return clip.label === 'Triple Elimination' ? 2 : 1;
-  };
-  const eliminations = (clip: Clip) => clip.events.filter(event => event.type === 'elimination' && event.role === 'by_owner').length;
-  return clips.toSorted((a, b) => rank(b) - rank(a) || eliminations(b) - eliminations(a) ||
-    a.localStamp.localeCompare(b.localStamp) || a.id.localeCompare(b.id))[0];
-}
-
 export function eventCaption(event: ClipEvent, player: string) {
   if (event.type === 'death') return player + ' was eliminated';
   if (event.type === 'knock' || event.type === 'elimination') {
