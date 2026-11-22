@@ -1,9 +1,12 @@
 import { createRootRouteWithContext, HeadContent, Link, Outlet, redirect } from '@tanstack/react-router'
 import { useQuery, type QueryClient } from '@tanstack/react-query'
+import { useSelector } from '@tanstack/react-store'
 import { Clapperboard, Gem, Plus, Swords } from 'lucide-react'
 import { Toaster } from 'sonner'
-import { hosted, isMissing, weekQuery } from '~/lib/queries'
+import { isMissing, weekQuery } from '~/lib/queries'
+import { base, demo, hosted } from '~/lib/mode'
 import { LiveDot } from '~/components/live'
+import { watchStore } from '~/library/watch'
 
 const everyTab = [
   { to: '/', label: 'Week', icon: Gem, exact: true },
@@ -14,13 +17,13 @@ const everyTab = [
 const tabs = everyTab.filter(tab => !hosted || tab.to !== '/clips')
 
 const library = (queryClient: QueryClient) => queryClient.ensureQueryData(weekQuery).catch(error => {
-  if (hosted && isMissing(error)) return null
+  if (hosted && !demo && isMissing(error)) return null
   throw error
 })
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ context, location }) => {
-    if (hosted && location.pathname !== '/import' && !(await library(context.queryClient))) throw redirect({ to: '/import' })
+    if (hosted && !demo && location.pathname !== '/track' && !(await library(context.queryClient))) throw redirect({ to: '/track' })
   },
   loader: ({ context }) => library(context.queryClient),
   head: () => ({ meta: [{ title: 'Chest Log' }] }),
@@ -36,6 +39,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function Shell() {
   // Read from the query cache, not the loader result, so the shell fills in the moment a first import lands.
   const { data: week } = useQuery(weekQuery)
+  const watching = useSelector(watchStore, state => state.phase === 'watching')
   return (
     <div className="min-h-dvh">
       <HeadContent />
@@ -51,13 +55,27 @@ function Shell() {
             ))}
           </nav>
           <span className="ml-auto flex items-center gap-2 text-sm text-mist">
-            {hosted
-              ? week && <Link to="/import" className="press flex h-8 items-center gap-1.5 rounded-full border border-line px-3 text-[13px] font-semibold text-bone hover:border-mist"><Plus className="size-3.5" strokeWidth={2.6} aria-hidden />Add replays</Link>
-              : <LiveDot />}
+            {!hosted && <LiveDot />}
+            {hosted && !demo && week && (
+              <Link to="/track" className="press flex h-8 items-center gap-1.5 rounded-full border border-line px-3 text-[13px] font-semibold text-bone hover:border-mist">
+                {watching
+                  ? <><span aria-hidden className="size-2 rounded-full bg-kelp" />Watching</>
+                  : <><Plus className="size-3.5" strokeWidth={2.6} aria-hidden />Add replays</>}
+              </Link>
+            )}
             {week?.player}
           </span>
         </div>
       </header>
+      {demo && (
+        <div className="border-b border-gold/25 bg-gold/10">
+          <p className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-sm">
+            <b className="text-gold">Demo library</b>
+            <span className="text-mist">Sample matches from one player, with every name replaced.</span>
+            <a href={`${base}track`} className="font-semibold text-bone underline decoration-gold/60 underline-offset-4 hover:text-gold sm:ml-auto">Add your own replays</a>
+          </p>
+        </div>
+      )}
       <div className="pb-24 md:pb-10">
         <Outlet />
       </div>
