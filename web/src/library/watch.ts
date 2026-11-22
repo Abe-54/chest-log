@@ -23,37 +23,46 @@ const knownReplays = async () => new Set((await allReplays()).map(record => `${r
 
 let current: FileSystemDirectoryHandle | undefined
 let timer: ReturnType<typeof setInterval> | undefined
-let checking = false
+let checking: Promise<void> | undefined
+// Bumped whenever watching stops, so a check already in flight drops what it found instead of saving it.
+let generation = 0
 let onImported: (outcome: ImportOutcome) => void = () => undefined
 
 /** Called after a check adds replays to the library, so the pages can read it again. */
 export const whenImported = (handler: (outcome: ImportOutcome) => void) => { onImported = handler }
 
 function pause(reason: string | null = null) {
+  generation++
   clearInterval(timer)
   timer = undefined
   if (current) set({ phase: 'paused', folder: current.name, reason })
 }
 
-async function check() {
-  if (!current || checking) return
-  checking = true
+function check() {
+  if (!current || checking) return checking
+  checking = read(current, generation).finally(() => { checking = undefined })
+  return checking
+}
+
+async function read(folder: FileSystemDirectoryHandle, started: number) {
+  const stale = () => started !== generation
   try {
-    if (await current.queryPermission({ mode: 'read' }) !== 'granted') return pause()
-    const fresh = await unseenReplays(await filesIn(current), await knownReplays())
+    if (await folder.queryPermission({ mode: 'read' }) !== 'granted') return pause()
+    const fresh = await unseenReplays(await filesIn(folder), await knownReplays())
+    if (stale()) return
     const outcome = fresh.length > 0 ? await importReplays(fresh) : undefined
+    if (stale()) return
     const state = watchStore.state
     if (state.phase === 'watching') set({ ...state, checkedAt: Date.now(), found: state.found + (outcome?.added ?? 0) })
     if (outcome) onImported(outcome)
   } catch {
-    pause('The folder could not be read. Choose it again.')
-  } finally {
-    checking = false
+    if (!stale()) pause('The folder could not be read. Choose it again.')
   }
 }
 
 /** Reads the folder now and again every 30 seconds until stopped. */
 export function startWatching(folder: FileSystemDirectoryHandle) {
+  generation++
   clearInterval(timer)
   current = folder
   set({ phase: 'watching', folder: folder.name, checkedAt: null, found: 0 })
@@ -63,12 +72,14 @@ export function startWatching(folder: FileSystemDirectoryHandle) {
 
 export const stopWatching = () => pause()
 
-/** The library was deleted, and the remembered folder with it. */
-export function forgetWatching() {
+/** Stops watching for good and waits out a check in flight, so deleting the library cannot be undone by it. */
+export async function forgetWatching() {
+  generation++
   clearInterval(timer)
   timer = undefined
   current = undefined
   set({ phase: 'off' })
+  await checking
 }
 
 /** Must be called from a click: the browser may ask the visitor to allow reading the remembered folder again. */

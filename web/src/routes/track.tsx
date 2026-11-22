@@ -56,10 +56,9 @@ function TrackPage() {
     if (!canPickFolder) return folderInput.current?.click()
     const folder = await chooseFolder()
     if (!folder) return
-    const files = await filesIn(folder)
-    const outcome = await importReplays(files)
-    // A folder whose matches are all still recording has no finished match yet, but it is the right one to watch.
-    if (outcome || files.length > 0) startWatching(folder)
+    const outcome = await importReplays(await filesIn(folder))
+    // An empty or still-recording Demos folder is still the right one to watch: the next match lands there.
+    startWatching(folder)
     await finish(outcome)
   }
   const fromInput = (input: HTMLInputElement) => {
@@ -166,7 +165,7 @@ function TrackPage() {
           )}
           <p className="mt-4 max-w-xl text-sm text-mist">Everything this site knows about your matches is stored in this browser. Deleting it here removes it for good. Your replay files are not touched.</p>
           <button type="button"
-            onClick={() => { if (confirm('Delete your Chest Log library from this browser?')) void forgetLibrary().then(forgetWatching).then(() => queryClient.resetQueries()).then(() => router.invalidate()) }}
+            onClick={() => { if (confirm('Delete your Chest Log library from this browser?')) void forgetWatching().then(forgetLibrary).then(() => queryClient.resetQueries()).then(() => router.invalidate()) }}
             className="press mt-4 inline-flex h-10 items-center gap-2 rounded-full border border-line px-4 text-sm font-semibold text-coral hover:border-coral">
             <Trash2 className="size-4" aria-hidden /> Delete my library
           </button>
