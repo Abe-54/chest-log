@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
-import { ArrowRight, Play } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { clipsQuery, weekQuery } from '~/lib/queries'
 import { clock, dateTime, decimal, placeLabel, shortDate } from '~/lib/format'
 import { BarList, Columns, DayColumns, MatchColumns, Segmented } from '~/components/charts'
@@ -52,14 +52,6 @@ function WeekPage() {
           options={[{ value: 'you', label: 'Just you', count: liveTotal ?? week.total }, { value: 'team', label: 'With teammates', count: (liveTotal ?? week.total) + teamTotal }]} />
         {week.stubs > 0 && <p className="mt-2 text-xs text-dim">{week.stubs} partial recording not counted.</p>}
         <LiveMatch />
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link to="/wrapped" className="press inline-flex h-12 items-center gap-2 rounded-full bg-gold px-5 font-semibold text-ink hover:bg-bone">
-            <Play className="size-4" fill="currentColor" /> Play your Wrapped
-          </Link>
-          <Link to="/routes" className="press inline-flex h-12 items-center gap-2 rounded-full border border-line px-5 font-semibold hover:border-mist">
-            Plan a chest route <ArrowRight className="size-4" />
-          </Link>
-        </div>
       </section>
       <aside className="mt-10 lg:mt-0" aria-labelledby="recent-games">
         <div className="mb-2 flex items-baseline justify-between">
@@ -127,7 +119,6 @@ function WeekPage() {
         <div>
           <Heading title="Where you dropped" note="Landings per spot." />
           <BarList items={week.drops} tone="kelp" format={n => `${n}×`} />
-          <Link to="/routes" className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-gold hover:text-bone">Compare drops on the map <ArrowRight className="size-4" /></Link>
         </div>
         <div>
           <Heading title="How it ended" note="Team placement at the end of each match." />
