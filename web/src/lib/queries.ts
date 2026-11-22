@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query'
-import type { Clips, Island, Match, Planner, Week } from '~/data'
+import type { Clips, Match, Week } from '~/data'
 import { getMatch, getValue } from '~/library/db'
 
 /**
@@ -35,8 +35,6 @@ const source = <T>(name: string, local: () => Promise<T | undefined>) =>
 
 const forever = { staleTime: Infinity, gcTime: 30 * 60 * 1000 }
 export const weekQuery = queryOptions({ queryKey: ['week'], queryFn: source<Week>('week', () => getValue('week')), ...forever })
-export const plannerQuery = queryOptions({ queryKey: ['planner'], queryFn: source<Planner>('planner', () => getValue('planner')), ...forever })
-export const islandQuery = queryOptions({ queryKey: ['island'], queryFn: source<Island>('island', () => getValue('island')), ...forever })
 // Clips are videos recorded on the PC that runs the local build; a hosted library has none.
 export const clipsQuery = queryOptions({ queryKey: ['clips'], queryFn: source<Clips>('clips', async () => ({ tolerance: 0, clips: [] })), ...forever })
 export const matchQuery = (id: string) => queryOptions({

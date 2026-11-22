@@ -4,7 +4,7 @@
 import { readdir, readFile } from 'node:fs/promises'
 import { isDeepStrictEqual } from 'node:util'
 import { chromium } from 'playwright'
-import type { ChestRegistry, ReplayIndex, ReplayMatch } from '../../data/types'
+import type { ReplayIndex, ReplayMatch } from '../../data/types'
 import type { Calibration } from '../pipeline/domain/model'
 import { buildDataset } from '../pipeline/dataset'
 
@@ -54,23 +54,21 @@ const readLibrary = `(async () => {
     request.onsuccess = () => resolve(request.result)
     request.onerror = () => reject(request.error)
   })
-  const library = { week: await get('kv', 'week'), planner: await get('kv', 'planner'), island: await get('kv', 'island'), meta: await get('kv', 'meta'), matches: await get('matches') }
+  const library = { week: await get('kv', 'week'), meta: await get('kv', 'meta'), matches: await get('matches') }
   db.close()
   return library
 })()`
-type Library = { week: { generatedAt: string; total: number }; planner: unknown; island: unknown; meta: { failed: unknown[] }; matches: { id: string }[] }
+type Library = { week: { generatedAt: string; total: number }; meta: { failed: unknown[] }; matches: { id: string }[] }
 const stored = await page.evaluate(readLibrary) as Library
 
 if (full) {
-  const [index, registry, calibration] = await Promise.all([
-    load<ReplayIndex>('data/index.json'), load<ChestRegistry>('data/chests.json'), load<Calibration>('map/calibration.json'),
+  const [index, calibration] = await Promise.all([
+    load<ReplayIndex>('data/index.json'), load<Calibration>('map/calibration.json'),
   ])
   const replays = await Promise.all(index.matches.filter(row => !row.error).map(row => load<ReplayMatch>(`data/matches/${row.id}.json`)))
-  const expected = buildDataset({ index, registry, calibration, replays, generatedAt: stored.week.generatedAt })
+  const expected = buildDataset({ index, calibration, replays, generatedAt: stored.week.generatedAt })
   const plain = (value: unknown) => JSON.parse(JSON.stringify(value))
   check(isDeepStrictEqual(stored.week, plain(expected.week)), `week equals the local pipeline (${stored.week.total} chests)`)
-  check(isDeepStrictEqual(stored.planner, plain(expected.planner)), 'planner equals the local pipeline')
-  check(isDeepStrictEqual(stored.island, plain(expected.island)), 'island equals the local pipeline')
   const byId = new Map(stored.matches.map(match => [match.id, match]))
   const different = expected.matches.filter(match => !isDeepStrictEqual(byId.get(match.id), plain(match))).map(match => match.id)
   check(different.length === 0 && stored.matches.length === expected.matches.length,
@@ -80,7 +78,7 @@ check(stored.meta.failed.length === 0, 'no replay failed to parse')
 
 await page.waitForTimeout(4500)
 if (shots) await page.screenshot({ path: `${shots}/hosted-home.png` })
-for (const path of ['/matches', `/matches/${stored.matches.at(-1)!.id}`, '/routes', '/wrapped']) {
+for (const path of ['/matches', `/matches/${stored.matches.at(-1)!.id}`]) {
   await page.goto(site + path, { waitUntil: 'networkidle' })
   check(page.url() === site + path && (await page.locator('#root').innerText()).trim().length > 0, `${path} opens`)
   if (shots) await page.screenshot({ path: `${shots}/hosted${path.replace(/\/matches\/.+/, '/match').replaceAll('/', '-')}.png` })

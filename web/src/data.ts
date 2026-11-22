@@ -40,7 +40,6 @@ export interface Week {
   wins: number
   topFive: number
   pace: number | null
-  aliveSeconds: number
   distanceKm: number
   mapCrossings: number
   firstChestMedian: number | null
@@ -54,16 +53,9 @@ export interface Week {
   chestTimes: number[]
   loot: Tally[]
   rarity: Tally[]
-  rarest: Tally[]
-  kinds: Tally[]
-  confidence: Tally[]
-  crew: Tally[]
   drops: Tally[]
   finishes: Tally[]
-  persona: { title: string; detail: string }
-  bestTrail: { trail: Px[][]; chests: Px[] } | null
   clipCount: number
-  standoutClipId: string | null
 }
 
 export type EventKind =
@@ -120,39 +112,6 @@ export interface Match {
   bus: [Px, Px] | null
   clips: ClipRef[]
   focus: [minX: number, minY: number, maxX: number, maxY: number] | null
-}
-
-export interface RouteStop { id: string; p: Px; appeared: number; mine: number }
-export interface Suggestion { start: Px; stops: RouteStop[]; seconds: number; metres: number; expected: number }
-export interface BestRun { matchId: string; landedAt: number; start: Px; trail: Px[][]; chests: Px[]; count: number; lastChest: number | null }
-export interface RouteWindow { budget: number; average: number | null; suggested: Suggestion | null; best: BestRun | null }
-export interface Drop {
-  id: string
-  name: string
-  center: Px
-  landings: number
-  pace: number | null
-  placement: number | null
-  lowSample: boolean
-  windows: RouteWindow[]
-}
-
-export interface Planner {
-  budgets: number[]
-  minimumLandings: number
-  drops: Drop[]
-  hotspot: { drop: Drop; count: number; radiusPx: number } | null
-  timing: { speed: number | null; openSeconds: number | null; recordings: number }
-  pois: { name: string; p: Px }[]
-}
-
-export interface Island {
-  /** Every post-landing trail of the week, flattened to paths. */
-  trails: Px[][]
-  myChests: Px[]
-  /** Registry chest sites: x, y, replays seen in, times I opened it. */
-  sites: [x: number, y: number, appeared: number, mine: number][]
-  landings: Px[]
 }
 
 export interface ClipEvent { t: number; kind: 'chest' | 'rare_chest' | 'ammo_box' | 'container' | 'knock' | 'elimination' | 'death'; mine: boolean; caption: string }

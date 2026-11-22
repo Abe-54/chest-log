@@ -89,11 +89,6 @@
   from { opacity: 0; transform: translateY(-4px) scale(0.97); }
 }
 
-@keyframes draw {
-  from { stroke-dashoffset: 1; }
-  to { stroke-dashoffset: 0; }
-}
-
 @keyframes chest-pop {
   0% { opacity: 0; transform: scale(2.4) rotate(-12deg); }
   60% { opacity: 1; transform: scale(0.94) rotate(-1deg); }
