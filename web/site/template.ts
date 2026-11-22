@@ -114,7 +114,7 @@ export const islandArt = () => {
 ${pins.map(([x, y]) => `<rect class="art-pin" x="-10" y="-10" width="20" height="20" rx="3" transform="translate(${x} ${y}) rotate(45)"/>`).join('')}
 <circle class="art-start" cx="360" cy="487" r="10"/>
 </svg>
-<p class="loot loot-odds"><strong>${calc.formatPercent(calc.chanceAtLeastOne(psa.oneIn, 1, DEMO.chests, 0))}</strong><span><span class="wide-only">Your Pirate Shop </span>token odds</span></p>
+<p class="loot loot-odds"><strong>${calc.formatPercent(calc.chanceAtLeastOne(psa.oneIn, 1, DEMO.chests, 0))}</strong><span><span class="wide-only">Squad's Pirate Shop </span>token odds</span></p>
 <p class="loot loot-best"><strong>${DEMO.bestMatch}</strong><span><span class="wide-only">Chests · </span>best match</span></p>
 </div>`
 }

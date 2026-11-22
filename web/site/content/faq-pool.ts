@@ -39,19 +39,23 @@ export const FAQ_POOL = {
   },
   odds: {
     q: 'What are the odds of getting the Pirate token?',
-    a: `Epic lists Pirate Shop Access at 1 in ${calc.formatCount(psa.oneIn)} for every chest you open in a normal match (${sourceLink('epic-drop-rates', `Epic's drop rate article`)}). Treasure Hours multiply that chance by ${psa.hoursBoost}. The ${link('/treasure-hunters-odds/', 'odds page')} has the full table and a calculator.`,
+    a: `Epic lists Pirate Shop Access at 1 in ${calc.formatCount(psa.oneIn)} for every chest opened in a normal match (${sourceLink('epic-drop-rates', `Epic's drop rate article`)}). Treasure is shared across the squad, so every chest a squadmate opens counts toward your odds too. Treasure Hours multiply that chance by ${psa.hoursBoost}. The ${link('/treasure-hunters-odds/', 'odds page')} has the full table and a calculator.`,
   },
   howMany: {
     q: 'How many chests until I get the Pirate Shop Access token?',
-    a: `No number guarantees it. At 1 in ${calc.formatCount(psa.oneIn)} per chest, about ${roundTo2(half)} chests give you a 50% chance and about ${roundTo2(ninety)} give you 90%. Those are our calculations from Epic's odds, not figures Epic publishes.`,
+    a: `No number guarantees it. At 1 in ${calc.formatCount(psa.oneIn)} per chest, about ${roundTo2(half)} chests opened by your squad give you a 50% chance and about ${roundTo2(ninety)} give you 90%. Those are our calculations from Epic's odds, not figures Epic publishes.`,
   },
   hours: {
     q: 'What are Treasure Hours?',
     a: `Treasure Hours are windows when Epic boosts the drop rate of some treasures. Epic lists 1.5x for Pirate Shop Access, 7.5x for the Weekly Gold Outfit and 10x for the Weekly Vehicle &amp; Decal. ${link('/treasure-hours/', 'Treasure Hours explained')} has the details.`,
   },
+  shared: {
+    q: 'If a squadmate finds the Pirate token, do I get it too?',
+    a: `Yes. When anyone in your squad finds the Pirate Shop Access token in a chest, everyone in the squad gets it, and the same goes for every other treasure (${sourceLink('vgc-squad', 'Video Games Chronicle')}). That makes your odds depend on how many chests your whole squad opens, not only yours.`,
+  },
   teammates: {
     q: "Does Chest Log count my teammates' chests?",
-    a: `It counts the chests your replay recorded. A teammate's count is what your replay saw, so it runs low when your squad splits up.`,
+    a: `Yes, and your token odds include them, because a treasure any squadmate finds goes to the whole squad. A teammate's count is what your replay saw, so it runs low when your squad splits up and your real odds are a little better than shown.`,
   },
   quests: {
     q: 'Why not use the Quests tab in Fortnite?',

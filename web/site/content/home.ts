@@ -15,7 +15,7 @@ export const ladderPercent = (chance: number) => {
 
 const LADDER = [
   { chests: 1_000, label: `${calc.formatCount(1_000)} chests` },
-  { chests: DEMO.chests, label: `${calc.formatCount(DEMO.chests)} · demo`, demo: true },
+  { chests: DEMO.chests, label: `${calc.formatCount(DEMO.chests)} · demo squad`, demo: true },
   { chests: 10_000, label: `${calc.formatCount(10_000)} chests` },
   { chests: 50_000, label: `${calc.formatCount(50_000)} chests`, wideOnly: true },
   { chests: coinFlip, label: `${calc.formatCount(coinFlip)} chests` },
@@ -64,8 +64,8 @@ export const home: Page = {
     {
       id: 'token-odds',
       eyebrow: 'Pirate Shop token odds',
-      heading: 'Did a token drop for you yet?',
-      html: `<div class="panel-copy"><p>Epic puts the drop at 1 in ${calc.formatCount(psa.oneIn)} per chest. Chest Log takes your real chest count and turns it into your own odds that at least one dropped.</p><p class="cta-row"><a class="btn btn-inline" href="/treasure-hunters-odds/">Get my odds</a></p>${cite('epic-drop-rates')}</div>${ladder}`,
+      heading: 'Did your squad find a token yet?',
+      html: `<div class="panel-copy"><p>Epic puts the drop at 1 in ${calc.formatCount(psa.oneIn)} per chest. When anyone in your squad finds a treasure in a chest, the whole squad gets it, so every chest your squad opens is a roll for you. Chest Log adds up your squad's real chest count and turns it into your odds that at least one dropped.</p><p class="cta-row"><a class="btn btn-inline" href="/treasure-hunters-odds/">Get my odds</a></p>${cite('epic-drop-rates')}</div>${ladder}`,
     },
     {
       id: 'what-you-get',
@@ -73,7 +73,7 @@ export const home: Page = {
       html: `<p>Chest Log is a free Fortnite chest counter for PC. Point it at the replay files Fortnite saves and it counts the chests you opened in every match. ${link('/fortnite-replay-files/', 'Where the files are')}.</p><ul class="features">
 <li><strong>A chest count for every match.</strong> See what each match gave you, not only a running total.</li>
 <li><strong>Every match on the map.</strong> Watch each match back on the island map.</li>
-<li><strong>Your Pirate token odds.</strong> Your chest count run through Epic's published per-chest odds. ${link('/treasure-hunters-odds/', 'See the odds and the calculator')}.</li>
+<li><strong>Your Pirate token odds.</strong> Your squad's chest count run through Epic's published per-chest odds. ${link('/treasure-hunters-odds/', 'See the odds and the calculator')}.</li>
 <li><strong>Auto tracking.</strong> In Chrome or Edge, Chest Log rechecks your replay folder every 30 seconds while the tab is open. ${link('/auto-track/', 'How auto tracking works')}.</li>
 <li><strong>Nothing leaves your computer.</strong> Replays are read in your browser. There is no account. ${link('/privacy/', 'Read the privacy details')}.</li>
 </ul>`,
@@ -95,6 +95,6 @@ export const home: Page = {
       })}<p>The in-game Quests tab is not a substitute. Players report that it shows one total with no history by match and stops counting at a cap. ${link('/faq/', 'More on that in the FAQ')}.</p>`,
     },
   ],
-  faq: pick('upload', 'where', 'odds', 'browser', 'teammates'),
+  faq: pick('upload', 'where', 'odds', 'shared', 'browser', 'teammates'),
   related: ['treasure-hunters-odds', 'fortnite-replay-files', 'auto-track', 'treasure-hours', 'privacy', 'faq'],
 }
