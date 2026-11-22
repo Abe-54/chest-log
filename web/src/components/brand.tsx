@@ -33,4 +33,5 @@ export function TabGlyph({ shape }: { shape: Glyph }) {
   )
 }
 
-export const DISCLAIMER = 'Not affiliated with or endorsed by Epic Games. Fortnite is a trademark of Epic Games, Inc.'
+/** Ends with the notice Epic's Fan Content Policy (section 1.10) requires, word for word. Matches the site's footer. */
+export const DISCLAIMER = 'Chest Log is an unofficial fan project. Portions of the materials used are trademarks and/or copyrighted works of Epic Games, Inc. All rights reserved by Epic. This material is not official and is not endorsed by Epic.'
