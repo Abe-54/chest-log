@@ -9,7 +9,7 @@ import type { Calibration } from '../pipeline/domain/model'
 import { buildDataset } from '../pipeline/dataset'
 
 const root = new URL('../../', import.meta.url)
-const site = process.env.SITE ?? 'http://127.0.0.1:4180'
+const site = process.env.SITE ?? 'http://127.0.0.1:4180/app'
 const shots = process.env.SHOTS
 const load = async <T>(path: string) => JSON.parse(await readFile(new URL(path, root), 'utf8')) as T
 
@@ -37,7 +37,7 @@ async function importAll() {
 }
 
 await page.goto(site + '/matches', { waitUntil: 'networkidle' })
-check(page.url() === site + '/import', 'an empty browser lands on the import screen')
+check(page.url() === site + '/track', 'an empty browser lands on the Auto-track screen')
 console.log(`first import of ${files.length} replays took ${(await importAll()).toFixed(1)} s`)
 if (shots) await page.screenshot({ path: `${shots}/hosted-celebrate.png` })
 
@@ -84,7 +84,7 @@ for (const path of ['/matches', `/matches/${stored.matches.at(-1)!.id}`]) {
   if (shots) await page.screenshot({ path: `${shots}/hosted${path.replace(/\/matches\/.+/, '/match').replaceAll('/', '-')}.png` })
 }
 
-await page.goto(site + '/import', { waitUntil: 'networkidle' })
+await page.goto(site + '/track', { waitUntil: 'networkidle' })
 if (shots) await page.screenshot({ path: `${shots}/hosted-add.png`, fullPage: true })
 const again = await importAll()
 const after = (await page.evaluate(readLibrary) as Library).week.total
