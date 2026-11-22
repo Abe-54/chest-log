@@ -12,16 +12,19 @@ const fail = (at: string, message: string) => failures.push(`${at}  ${message}`)
 const warn = (at: string, message: string) => warnings.push(`${at}  ${message}`)
 const check = (ok: boolean, at: string, message: string) => { if (!ok) fail(at, message) }
 
+const bypass = process.env.VERCEL_PROTECTION_BYPASS
+const bypassHeaders: Record<string, string> = bypass ? { 'x-vercel-protection-bypass': bypass, 'x-vercel-set-bypass-cookie': 'true' } : {}
+
 const ANALYTICS = '/_vercel/insights/script.js'
 const stripOrigin = (url: string) => url.replace(base, '')
 
 async function get(path: string) {
-  const response = await fetch(base + path, { redirect: 'manual' })
+  const response = await fetch(base + path, { redirect: 'manual', headers: bypassHeaders })
   return { status: response.status, type: response.headers.get('content-type') ?? '', body: await response.text(), headers: response.headers }
 }
 
 const browser = await launchBrowser()
-const context = await browser.newContext({ viewport: { width: 1280, height: 900 } })
+const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, extraHTTPHeaders: bypassHeaders })
 await context.addInitScript('window.__name = window.__name || (fn => fn)')
 
 async function checkPage(slug: string) {

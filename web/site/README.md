@@ -36,6 +36,8 @@ npm run site:typecheck
 npm run site:og         # regenerate the share image after a theme change
 ```
 
+Preview deployments sit behind Vercel's login. Create a Protection Bypass for Automation secret in the project settings and pass it as `VERCEL_PROTECTION_BYPASS=<secret>` when you run `site:verify` against one.
+
 Add `--app` to `site:verify` once the app build lands under `/app/`. It then requires `/app/` and `/app/demo` to serve the app shell.
 
 ## Retheming

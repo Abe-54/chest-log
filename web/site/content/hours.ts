@@ -17,7 +17,7 @@ export const hours: Page = {
   label: 'Treasure Hours',
   title: 'Fortnite Treasure Hours Explained: Boosted Chest Odds',
   description: `What Fortnite Treasure Hours are. Epic lists boosts of ${psa.hoursBoost}x for Pirate Shop Access, ${gold.hoursBoost}x for the Gold Outfit and ${vehicle.hoursBoost}x for Vehicle & Decal.`,
-  h1: 'Fortnite Treasure Hours: what they are and how they change your odds',
+  h1: 'What Fortnite Treasure Hours are and how they change your odds',
   lede: `<p>Treasure Hours are Epic's scheduled windows with boosted treasure drops. This page lists the boosts Epic published, what they do to your odds, and where Epic announces each one.</p>`,
   ctas: [{ label: 'Open the odds calculator', href: '/treasure-hunters-odds/', kind: 'primary' }],
   published: '2026-11-22',
