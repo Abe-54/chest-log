@@ -1,8 +1,9 @@
-// Drives the built hosted app in headless Chromium, with no replays needed: an empty browser lands on Auto-track,
-// the demo opens a week and a match replay, the replay reader boots from /app/engine, and a watched folder shows its
-// status. Every request must succeed and nothing may log an error.
+// Drives the built hosted app in headless Chromium, with no replays needed: an empty browser lands on the add page,
+// the demo opens a week and a match replay, the replay reader boots from /app/engine, and a stand-in companion on
+// 127.0.0.1:47811 hands a file to the page. Every request must succeed and nothing may log an error.
 // Run: npx vite build --mode hosted && node scripts/serve-hosted.mjs & npx tsx scripts/hosted-smoke.ts
 // Set CHROME to a Chromium binary when Playwright's own download is not installed.
+import { createServer } from 'node:http'
 import { chromium } from 'playwright'
 
 const site = process.env.SITE ?? 'http://127.0.0.1:4180/app'
@@ -26,7 +27,7 @@ for (const start of ['/', '/import', '/matches']) {
   await page.goto(site + start, { waitUntil: 'networkidle' })
   check(path() === '/app/track', `/app${start === '/' ? '/' : start} lands on /app/track`)
 }
-check(await page.getByRole('heading', { name: 'Pick your Demos folder' }).isVisible(), 'the add page offers the Demos folder')
+check(await page.getByRole('heading', { name: 'Or pick the folder yourself' }).isVisible(), 'the add page offers the Demos folder')
 check(await page.getByRole('heading', { name: 'Or drop it here' }).isVisible(), 'the add page offers a single replay')
 check((await page.locator('code').filter({ hasText: 'FortniteGame' }).first().innerText()).includes('%LOCALAPPDATA%\\FortniteGame\\Saved\\Demos'), 'it names the Demos folder')
 await shot('track')
@@ -40,6 +41,34 @@ check(true, 'the replay reader booted from /app/engine and refused a file that i
 const chooser = page.waitForEvent('filechooser')
 await page.getByRole('button', { name: 'Choose Demos folder' }).click()
 check((await chooser).isMultiple() && (await page.locator('input[type=file][webkitdirectory]').count()) === 1, 'Choose Demos folder opens the folder picker')
+
+// A stand-in for Chest Log Companion, speaking its protocol (companion/README.md). The page must not call it until
+// Connect is clicked, because that first call is what makes Chrome ask the visitor for local network access.
+const companionHits: string[] = []
+const stand = createServer((request, response) => {
+  companionHits.push(request.url ?? '')
+  response.setHeader('Access-Control-Allow-Origin', request.headers.origin ?? '')
+  response.setHeader('Vary', 'Origin')
+  const file = { name: 'companion-test.replay', size: 7000, modified: new Date().toISOString() }
+  if (request.url === '/v1/status') return response.end(JSON.stringify({ app: 'chest-log-companion', version: '0.0.0', folder: 'C:\\Demos', folderExists: true, replays: 1 }))
+  if (request.url === '/v1/replays') return response.end(JSON.stringify({ replays: [file] }))
+  if (request.url === `/v1/replays/${file.name}`) return response.end(Buffer.alloc(file.size))
+  response.writeHead(404).end()
+}).listen(47811, '127.0.0.1')
+await page.goto(site + '/track', { waitUntil: 'networkidle' })
+check(companionHits.length === 0, 'the page does not reach for the companion before Connect')
+await page.context().grantPermissions(['local-network-access'], { origin: new URL(site).origin })
+await page.getByRole('button', { name: 'Connect' }).click()
+await page.getByRole('heading', { name: 'Companion connected' }).waitFor({ timeout: 20_000 }).catch(async error => {
+  console.log('companion hits:', companionHits.join(', '), '\npanel:', await page.locator('section').first().innerText())
+  throw error
+})
+check(companionHits.includes('/v1/replays/companion-test.replay'), `Connect lists the folder and fetches the new replay (${companionHits.join(', ')})`)
+await page.getByText('None of those files held a finished match.').waitFor({ timeout: 120_000 })
+check(true, 'the replay from the companion reached the replay reader')
+await shot('companion')
+await page.getByRole('button', { name: 'Disconnect' }).click()
+stand.close()
 
 // The demo is the same app one level deeper, reading the published library instead of this browser's.
 await page.goto(site + '/track', { waitUntil: 'networkidle' })

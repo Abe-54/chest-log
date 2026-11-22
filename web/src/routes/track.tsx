@@ -1,17 +1,21 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { createFileRoute, redirect, useNavigate, useRouter } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSelector } from '@tanstack/react-store'
-import { Check, Copy, Folder, Lock, Trash2, Upload } from 'lucide-react'
+import { Check, Copy, Download, Folder, Lock, Trash2, Upload } from 'lucide-react'
 import { weekQuery } from '~/lib/queries'
 import { base, demo, hosted } from '~/lib/mode'
 import { celebrationStore } from '~/lib/live'
-import { plural } from '~/lib/format'
+import { plural, timeOfDay } from '~/lib/format'
+import { useNow } from '~/lib/now'
 import { getValue } from '~/library/db'
 import { droppedFiles, forgetLibrary, importReplays, importStore, type ImportOutcome, type ImportState } from '~/library/import'
+import { CHECK_EVERY_MS, companionStore, connectCompanion, disconnectCompanion, type CompanionState } from '~/library/companion'
 import { cn } from '~/lib/cn'
 
 const DEMOS = '%LOCALAPPDATA%\\FortniteGame\\Saved\\Demos'
+const DOWNLOAD = 'https://github.com/Abe-54/chest-log/releases/latest/download/ChestLogCompanion.exe'
+const ABOUT = '/companion/'
 
 export const Route = createFileRoute('/track')({
   beforeLoad: () => {
@@ -41,6 +45,7 @@ function TrackPage() {
   const [over, setOver] = useState(false)
   const folderInput = useRef<HTMLInputElement>(null)
   const fileInput = useRef<HTMLInputElement>(null)
+  const companion = useSelector(companionStore, value => value)
   const busy = state.phase === 'parsing' || state.phase === 'building'
 
   /** A first import or a hand-picked one: read the library again, celebrate what it added, and show it. */
@@ -74,8 +79,8 @@ function TrackPage() {
       }}>
       <h1 className="display text-[44px] md:text-display-lg">{week ? 'Add matches' : 'Count my chests'}</h1>
       <p className="mt-3 max-w-[640px] text-[15px] leading-[22px] text-mist md:text-[17px] md:leading-[26px]">
-        <span className="md:hidden">Chest Log reads your Fortnite Demos folder on a Windows PC.</span>
-        <span className="max-md:hidden">Pick your Fortnite Demos folder and Chest Log counts every match in it. After you play, pick it again to add the new ones.</span>
+        <span className="md:hidden">Chest Log reads your Fortnite replays on a Windows PC.</span>
+        <span className="max-md:hidden">With Chest Log Companion running, every match you finish lands here on its own. Without it, pick your Demos folder after you play.</span>
       </p>
       {!week && (
         <p className="mt-3 text-[15px] text-mist">Just looking? <a href={`${base}demo`} className="font-semibold text-gold hover:text-bone">Try the demo library</a>.</p>
@@ -84,7 +89,8 @@ function TrackPage() {
       <div className="mt-6 grid items-start gap-6 md:mt-10 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:grid-cols-[minmax(0,1fr)_440px]">
         <div className="grid gap-6">
           {state.phase === 'error' && <p role="alert" className="rounded-[10px] bg-coral/15 px-4 py-3 text-[15px] font-semibold text-coral">{state.message}</p>}
-          <AddPanel state={state} matches={week ? week.realMatches + week.stubs : null} onFolder={chooseDemos} />
+          <CompanionPanel companion={companion} state={state} />
+          <AddPanel state={state} matches={week ? week.realMatches + week.stubs : null} onFolder={chooseDemos} quiet={companion.phase === 'connected'} />
         </div>
         <DropZone over={over} busy={busy} onFiles={chooseFiles} />
         <input ref={folderInput} type="file" hidden multiple {...{ webkitdirectory: '' }} onChange={event => fromInput(event.currentTarget)} />
@@ -136,14 +142,17 @@ function TrackPage() {
  * The Demos folder, picked after each session. Browsers will not let a website keep access to it (Windows keeps it in AppData),
  * so this is the whole flow: one click, and matches already counted are skipped. While replays are read, progress takes the panel.
  */
-function AddPanel({ state, matches, onFolder }: { state: ImportState; matches: number | null; onFolder: () => void }) {
+function AddPanel({ state, matches, onFolder, quiet }: { state: ImportState; matches: number | null; onFolder: () => void; quiet: boolean }) {
   const [copied, setCopied] = useState(false)
   const returning = matches !== null
+  if (quiet) return (
+    <p className="text-[15px] text-mist">Need an older replay from somewhere else? <button type="button" onClick={onFolder} className="font-semibold text-gold hover:text-bone">Pick a folder</button> or drop files on the right.</p>
+  )
   return (
     <section aria-labelledby="add-title" className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-5 rounded-panel border border-line bg-ink-2 p-5 md:p-8">
       <FolderGlyph className="size-11 text-gold md:size-14" />
       <div className="min-w-0">
-        <h2 id="add-title" className="display text-[30px] leading-none md:text-[40px]">{returning ? 'Add new matches' : 'Pick your Demos folder'}</h2>
+        <h2 id="add-title" className="display text-[30px] leading-none md:text-[40px]">{returning ? 'Add new matches by hand' : 'Or pick the folder yourself'}</h2>
         <p className="mt-1.5 text-[15px] text-mist">
           {returning
             ? <>{plural(matches, 'match', 'matches')} counted so far. Choose the folder after you play; the ones already counted are skipped.</>
@@ -153,13 +162,98 @@ function AddPanel({ state, matches, onFolder }: { state: ImportState; matches: n
       {state.phase === 'parsing' || state.phase === 'building'
         ? <Progress state={state} />
         : <div className="col-span-full flex flex-wrap items-center gap-x-5 gap-y-3">
-            <button type="button" onClick={onFolder} className={primary}>{returning ? 'Add new matches' : 'Choose Demos folder'}</button>
+            <button type="button" onClick={onFolder} className={secondary}>{returning ? 'Add new matches' : 'Choose Demos folder'}</button>
             <CopyPath className="max-md:hidden" />
             <button type="button" className={cn(secondary, 'md:hidden')}
               onClick={() => void navigator.clipboard.writeText(location.href).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500) })}>
               {copied ? 'Link copied' : 'Copy link for PC'}
             </button>
           </div>}
+    </section>
+  )
+}
+
+const COPY: Record<Exclude<CompanionState['phase'], 'connected'>, { title: string; body: ReactNode }> = {
+  idle: {
+    title: 'Count new matches automatically',
+    body: <>Chest Log Companion is a small, free Windows app. While it runs, every match you finish shows up here on its own. It only reads your replay folder, and only this site on this PC can ask it for replays.</>,
+  },
+  connecting: {
+    title: 'Connecting to the companion',
+    body: <>Chrome may ask to let this site <b className="font-bold text-bone">access other apps and services on this device</b>. Choose Allow. That is how this page talks to the companion on your PC.</>,
+  },
+  absent: {
+    title: 'The companion isn’t running',
+    body: <>Start <b className="font-bold text-bone">Chest Log Companion</b>. Once it runs it sits in the tray by the clock, and this page connects within 30 seconds. Not installed yet? Download it below.</>,
+  },
+  blocked: {
+    title: 'Chrome blocked the connection',
+    body: <>Click the icon left of the address bar, open <b className="font-bold text-bone">Site settings</b>, set <b className="font-bold text-bone">Local network access</b> to Allow, then reload this page.</>,
+  },
+  'no-folder': {
+    title: 'No replay folder yet',
+    body: <>The companion is running, but Fortnite hasn’t made its replay folder. Turn on <b className="font-bold text-bone">Record Replays</b> in Fortnite and finish a match.</>,
+  },
+}
+
+/** Connect is a click, because the first call to 127.0.0.1 is what makes Chrome ask the visitor. */
+function CompanionPanel({ companion, state }: { companion: CompanionState; state: ImportState }) {
+  if (companion.phase === 'connected') return <ConnectedPanel companion={companion} state={state} />
+  const { title, body } = COPY[companion.phase]
+  const waiting = companion.phase === 'connecting'
+  const fixing = companion.phase === 'no-folder' || companion.phase === 'blocked'
+  return (
+    <section aria-labelledby="companion-title" className={cn('rounded-panel border border-line bg-ink-2 p-5 md:p-8', companion.phase === 'blocked' && 'border-t-4 border-t-coral')}>
+      <h2 id="companion-title" className="display text-[30px] leading-none md:text-[40px]">{title}</h2>
+      <p className="mt-2 max-w-2xl text-[15px] leading-[22px] text-mist">{body}</p>
+      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
+        {!fixing && <a href={DOWNLOAD} className={primary}><Download className="size-5" aria-hidden />Download for Windows</a>}
+        <button type="button" disabled={waiting} onClick={() => void connectCompanion()} className={fixing ? primary : secondary}>
+          {waiting ? 'Connecting…' : companion.phase === 'idle' ? 'Connect' : 'Try again'}
+        </button>
+        <a href={ABOUT} className="text-sm font-semibold text-gold hover:text-bone">What it does and why it’s safe</a>
+      </div>
+    </section>
+  )
+}
+
+const RING = 2 * Math.PI * 24
+
+function ConnectedPanel({ companion, state }: { companion: Extract<CompanionState, { phase: 'connected' }>; state: ImportState }) {
+  const now = useNow(1000)
+  const since = companion.checkedAt === null ? null : Math.max(0, now - companion.checkedAt)
+  const next = since === null ? null : Math.max(0, Math.ceil((CHECK_EVERY_MS - since) / 1000))
+  return (
+    <section aria-labelledby="companion-title" className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-5 rounded-panel border border-line border-t-4 border-t-live bg-ink-2 p-5 md:grid-cols-[auto_minmax(0,1fr)_auto] md:p-8">
+      <svg viewBox="0 0 56 56" aria-hidden className="size-11 -rotate-90 motion-reduce:hidden md:size-14">
+        <circle cx="28" cy="28" r="24" fill="none" strokeWidth="5" className="stroke-line" />
+        {companion.checkedAt !== null && (
+          <circle key={companion.checkedAt} cx="28" cy="28" r="24" fill="none" strokeWidth="5" strokeLinecap="round" className="stroke-live"
+            strokeDasharray={RING} style={{ '--ring': RING, animation: `ring-down ${CHECK_EVERY_MS}ms linear both`, animationDelay: `-${since}ms` } as CSSProperties} />
+        )}
+        <circle cx="28" cy="28" r="7" className="fill-live" />
+      </svg>
+      <div className="min-w-0 motion-reduce:col-span-2 md:motion-reduce:col-span-1">
+        <h2 id="companion-title" className="display text-[32px] leading-none md:text-[40px]">Companion connected</h2>
+        <p role="status" className="num mt-1.5 text-sm font-semibold text-rarity-uncommon-text md:text-base">
+          {next === null ? 'Checking now…' : <>{plural(companion.replays, 'replay')} in your folder · next check in {next} s</>}
+        </p>
+      </div>
+      <button type="button" onClick={() => void disconnectCompanion()} className={cn(small, 'max-md:order-last max-md:col-span-2 max-md:h-12 max-md:text-base md:col-start-3 md:row-start-1')}>Disconnect</button>
+      {state.phase === 'parsing' || state.phase === 'building'
+        ? <Progress state={state} />
+        : <ol className="col-span-full border-t border-line-soft">
+            {companion.session.map(entry => (
+              <li key={entry.at} className="flex items-center gap-4 border-b border-line-soft py-4 motion-safe:animate-[caption-in_240ms_var(--ease-out)]">
+                <span className="display num w-16 shrink-0 text-[28px] leading-none text-gold motion-safe:animate-[chest-pop_650ms_var(--ease-pop)_both]">+{entry.gained}</span>
+                <span className="min-w-0 flex-1 text-[15px] font-semibold">{entry.added === 1 ? 'New match added' : `${entry.added} new matches added`}</span>
+                <time className="shrink-0 text-[13px] text-dim">{timeOfDay(new Date(entry.at).toISOString())}</time>
+              </li>
+            ))}
+            {companion.session.length === 0 && (
+              <li className="border-b border-line-soft py-4 text-[15px] text-mist-2">Keep this tab open while you play. Each match shows up here a few seconds after it ends.</li>
+            )}
+          </ol>}
     </section>
   )
 }

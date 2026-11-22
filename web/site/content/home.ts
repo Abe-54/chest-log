@@ -76,7 +76,7 @@ export const home: Page = {
           ['During a match', 'You tap or type each time you open a chest.', 'Nothing. You play normally.'],
           ['A match you forgot to log', 'Lost.', 'Counted, as long as its replay file still exists.'],
           ['Match history', 'Usually one running total.', 'A count for every match, and every match on the map.'],
-          ['New matches', 'You add them by hand.', 'One click after you play. Matches already counted are skipped.'],
+          ['New matches', 'You add them by hand.', `Counted as each match ends with the ${link('/companion/', 'companion app')}, or one click after you play.`],
           ['Account and uploads', 'Often an account.', `No account. ${link('/privacy/', 'Replays never leave your computer')}.`],
         ],
       })}<p>The in-game Quests tab is not a substitute. Players report that it shows one total with no history by match and stops counting at a cap. ${link('/faq/', 'More on that in the FAQ')}.</p>`,

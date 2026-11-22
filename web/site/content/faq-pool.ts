@@ -63,7 +63,7 @@ export const FAQ_POOL = {
   },
   newMatches: {
     q: 'How do I add new matches?',
-    a: `After you play, open Chest Log and choose your Demos folder again. Matches it already counted are skipped, so only the new ones are read. Browsers do not let a website watch that folder on its own, because Windows keeps it inside AppData.`,
+    a: `Install the ${link('/companion/', 'Chest Log Companion')} and each match is counted a few seconds after it ends. Without it, choose your Demos folder again after you play. Matches already counted are skipped. Browsers do not let a website watch that folder by itself, because Windows keeps it inside AppData.`,
   },
   speed: {
     q: 'How long does an import take?',
