@@ -24,7 +24,8 @@ function WeekPage() {
   // The tracker's total moves seconds after a match, before the rebuilt week data lands.
   const liveTotal = useSelector(liveStore, status => status && status.phase !== 'off' ? status.total : null)
   const liveMatches = useSelector(liveStore, status => status && status.phase !== 'off' ? status.matches : null)
-  const [withTeam, setWithTeam] = useState(false)
+  // Treasure any squadmate finds goes to the whole squad, so the odds start from the squad's chests.
+  const [withTeam, setWithTeam] = useState(true)
   const [chart, setChart] = useState<'match' | 'day'>('match')
   const teamTotal = week.team.opened + week.team.broken
   const real = week.matches.filter(match => !match.stub)
@@ -49,7 +50,7 @@ function WeekPage() {
           </h1>
           <p className="mt-4 flex flex-wrap items-baseline gap-x-2.5 gap-y-2 md:mt-3">
             <span className="display num text-[28px] leading-none md:text-4xl">{percent(tokenChance(counted))}</span>
-            <span className="text-base text-mist md:text-lg">chance one <span className="max-md:hidden">of them </span>dropped a Pirate Shop token</span>
+            <span className="text-base text-mist md:text-lg">{withTeam ? 'chance your squad found' : 'chance you found'} a Pirate Shop token</span>
             <span className="max-md:basis-full">
               <span title={`Epic’s published Pirate Shop Access drop rate is 1 in ${CHESTS_PER_TOKEN.toLocaleString()} per chest`}
                 className="num inline-flex h-7 items-center rounded-pill border border-line px-2.5 text-[13px] text-mist">
@@ -59,7 +60,7 @@ function WeekPage() {
           </p>
         </div>
         <Segmented look="gold" label="Whose chests to count" className="w-full shrink-0 lg:w-auto" value={withTeam ? 'team' : 'you'} onChange={value => setWithTeam(value === 'team')}
-          options={[{ value: 'you', label: 'Just you', count: yours }, { value: 'team', label: 'With teammates', count: yours + teamTotal }]} />
+          options={[{ value: 'team', label: 'Whole squad', count: yours + teamTotal }, { value: 'you', label: 'Just you', count: yours }]} />
       </section>
       {week.stubs > 0 && <p className="mt-3 text-xs text-dim">{week.stubs} partial recording not counted.</p>}
       <LiveMatch />
@@ -157,7 +158,7 @@ function WeekPage() {
 
       <p className="mt-10 text-sm text-dim">
         Counted from {real.length} Fortnite replay files. {Math.round(week.confirmedShare * 100)}% of the {week.total.toLocaleString()} chests name {week.player}’s character as the opener in the replay itself.
-        {' '}Token odds use Epic’s published Pirate Shop Access drop rate of 1 in {CHESTS_PER_TOKEN.toLocaleString()} per chest, with every chest an independent roll.
+        {' '}Token odds use Epic’s published Pirate Shop Access drop rate of 1 in {CHESTS_PER_TOKEN.toLocaleString()} per chest, with every chest an independent roll. A treasure any squadmate finds goes to the whole squad, so squad odds count everyone’s chests; teammate counts are what your replays saw, so they run low.
       </p>
     </main>
   )

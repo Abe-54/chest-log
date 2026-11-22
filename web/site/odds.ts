@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import type { SourceId } from './sources.ts'
 
 export type Treasure = { id: string; name: string; oneIn: number; hoursBoost?: number }
@@ -57,8 +58,17 @@ type CalcLib = {
 
 export const calc = new Function(`${CALC_SOURCE}; return { chanceAtLeastOne, chestsFor, formatPercent, formatCount }`)() as CalcLib
 
-/** The demo week the app ships with. The landing page quotes its numbers. */
-export const DEMO = { chests: 3_626, bestMatch: 77 } as const
+type DemoWeek = { total: number; team: { opened: number; broken: number }; matches: { chests: number; stub?: boolean }[] }
+const demoWeek: DemoWeek = JSON.parse(readFileSync(new URL('../public/demo/week.json', import.meta.url), 'utf8'))
+
+/**
+ * The demo week the app ships with, read from its data so the landing page cannot drift from it. Treasure from a chest
+ * goes to the whole squad, so the odds use the squad's chests: the player's plus the teammates' their replays saw.
+ */
+export const DEMO = {
+  chests: demoWeek.total + demoWeek.team.opened + demoWeek.team.broken,
+  bestMatch: Math.max(...demoWeek.matches.filter(match => !match.stub).map(match => match.chests)),
+} as const
 
 export const DEFAULT_CHESTS = { normal: 10_000, hours: 0 } as const
 

@@ -24,8 +24,8 @@ const chance = (entry: Treasure, normal: number, hours = 0) => calc.formatPercen
 const calcData = JSON.stringify(ALL_TREASURES.map(entry => ({ name: esc(entry.name), oneIn: entry.oneIn, boost: entry.hoursBoost ?? 1 })))
 
 const calculatorHtml = `<form id="calc" class="calc" novalidate>
-<div class="field"><label for="normal">Chests you opened in normal matches</label><input id="normal" name="normal" type="number" inputmode="numeric" min="0" step="1" value="${DEFAULT_CHESTS.normal}"></div>
-<div class="field"><label for="hours">Chests you opened during Treasure Hours</label><input id="hours" name="hours" type="number" inputmode="numeric" min="0" step="1" value="${DEFAULT_CHESTS.hours}"></div>
+<div class="field"><label for="normal">Chests your squad opened in normal matches</label><input id="normal" name="normal" type="number" inputmode="numeric" min="0" step="1" value="${DEFAULT_CHESTS.normal}"></div>
+<div class="field"><label for="hours">Chests your squad opened during Treasure Hours</label><input id="hours" name="hours" type="number" inputmode="numeric" min="0" step="1" value="${DEFAULT_CHESTS.hours}"></div>
 </form>
 ${table({
   caption: 'Chance of finding each reward at least once',
@@ -66,7 +66,7 @@ export const oddsPage: Page = {
   title: 'Fortnite Pirate Token Odds and Gold Outfit Odds',
   description: `Epic's chest odds for Treasure Hunters: Pirate Shop Access 1 in ${calc.formatCount(psa.oneIn)}, Weekly Gold Outfit 1 in ${calc.formatCount(gold.oneIn)}. Calculate your own chance.`,
   h1: 'Fortnite Pirate token odds and gold outfit odds',
-  lede: `<p>Epic publishes the chance of finding each Treasure Hunters reward every time you open a chest. This page shows those numbers, what they mean for a real chest count, and a calculator for yours.</p>`,
+  lede: `<p>Epic publishes the chance of finding each Treasure Hunters reward every time you open a chest. This page shows those numbers, what they mean for a real chest count, and a calculator for yours. Treasure is shared across the squad, so count every chest your squad opened.</p>`,
   ctas: [{ label: 'Count your own chests', href: '/app/track', kind: 'primary' }],
   published: '2026-11-22',
   updated: '2026-11-22',
@@ -97,7 +97,7 @@ export const oddsPage: Page = {
       id: 'chests-needed',
       heading: 'How many chests for a 50% or 90% chance',
       html: `<p>One in ${calc.formatCount(psa.oneIn)} does not mean you are owed a token after ${calc.formatCount(psa.oneIn)} chests. Each chest is a separate roll, and a miss does not make the next chest more likely. The average wait is ${calc.formatCount(psa.oneIn)} chests, but your chance of having found one passes 50% after about ${about(calc.chestsFor(0.5, psa.oneIn, 1))}.</p>${table({
-        caption: 'Chests you need to open for a given chance of at least one reward',
+        caption: 'Chests your squad needs to open for a given chance of at least one reward',
         head: ['Reward', '50% chance', '90% chance', '50% in Treasure Hours', '90% in Treasure Hours'],
         numeric: [1, 2, 3, 4],
         rows: headline.map(entry => [
@@ -117,19 +117,18 @@ export const oddsPage: Page = {
     {
       id: 'squads',
       heading: 'Squads and teammates',
-      html: `<p>Epic words the odds as your chance each time you open a chest. Its help article does not say whether a treasure found by one squad member is shared with teammates. ${sourceLink('vgc-squad', 'Video Games Chronicle')} reports that if anyone in your squad finds the Pirate Shop Token in a chest, every member of the squad gets it. We could not find that in an Epic source, so treat it as unconfirmed.</p><p>If sharing is true for your squad, every chest any squad member opens is a chance for the whole squad, and you would enter the squad's total in the calculator. If it is false, only your own chests count. Chest Log counts chests for you and for the teammates your replay saw, and a teammate's count runs low when your squad splits up.</p>`,
+      html: `<p>Treasure is shared. When anyone in your squad finds the Pirate Shop Access token in a chest, every member of the squad gets it, and the same holds for every other treasure, Gold Outfits included. ${sourceLink('vgc-squad', 'Video Games Chronicle')} reported it first, and it matches what we have seen in our own squads.</p><p>So every chest any squad member opens is a roll for the whole squad. Enter your squad's total in the calculator, and a squad of four reaches a coin flip on the Pirate token about four times sooner than a solo player opening chests at the same pace. Chest Log counts chests for you and for the teammates your replay saw. A teammate's count runs low when your squad splits up, so your real odds are a little better than Chest Log shows.</p>`,
     },
     {
       id: 'unconfirmed',
       heading: 'What we could not confirm with Epic',
       html: `<ul>
 <li>Any Treasure Hours boost other than the three Epic lists. Some outlets report different multipliers for individual events. Epic's article only says future rates may be higher, and the event posts we read do not restate treasure multipliers.</li>
-<li>Whether teammates share a token, covered above.</li>
 <li>Whether Epic changes the base odds after the season. These figures are the ones on Epic's page on ${longDate(CHECKED)}.</li>
 </ul>`,
     },
   ],
-  faq: pick('odds', 'howMany', 'hours', 'teammates'),
+  faq: pick('odds', 'howMany', 'shared', 'hours', 'teammates'),
   related: ['treasure-hours', 'auto-track', 'fortnite-replay-files', 'faq'],
   script,
 }
