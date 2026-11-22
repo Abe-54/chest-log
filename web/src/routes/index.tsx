@@ -45,7 +45,7 @@ function WeekPage() {
             <span className="display num text-hero-sm tracking-[-0.02em] text-gold text-shadow-numeral-sm md:text-[10rem] md:leading-[0.876] md:text-shadow-numeral lg:text-hero">
               <HeroTotal total={counted} />
             </span>
-            <span className="display text-[44px] text-shadow-word md:text-[72px] md:leading-none">Chests</span>
+            <span className="display mt-3 text-[44px] text-shadow-word md:mt-0 md:text-[72px] md:leading-none">Chests</span>
           </h1>
           <p className="mt-4 flex flex-wrap items-baseline gap-x-2.5 gap-y-2 md:mt-3">
             <span className="display num text-[28px] leading-none md:text-4xl">{percent(tokenChance(counted))}</span>
