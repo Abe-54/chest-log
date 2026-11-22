@@ -17,7 +17,7 @@ export const privacy: Page = {
     {
       id: 'replays',
       heading: 'What happens to your replays',
-      html: `<p>When you pick your replay folder or files, your browser reads them with a WebAssembly program that Chest Log serves with the page. The reading happens on your computer.</p><p>The results are your match list and your chest counts. They are saved in IndexedDB, which is storage built into your browser and tied to this site. They are not sent anywhere. In Chrome and Edge, the browser also remembers the folder you picked so Chest Log can recheck it.</p>`,
+      html: `<p>When you pick your replay folder or files, your browser reads them with a WebAssembly program that Chest Log serves with the page. The reading happens on your computer.</p><p>The results are your match list and your chest counts. They are saved in IndexedDB, which is storage built into your browser and tied to this site. They are not sent anywhere.</p>`,
     },
     {
       id: 'names',
@@ -37,7 +37,7 @@ export const privacy: Page = {
     {
       id: 'delete',
       heading: 'Delete your data',
-      html: `<p>Clear the site data for this site in your browser settings. That removes the stored match list and the remembered folder. Your replay files stay where they are.</p>`,
+      html: `<p>Clear the site data for this site in your browser settings. That removes the stored match list. Your replay files stay where they are.</p>`,
     },
     {
       id: 'code',
@@ -46,5 +46,5 @@ export const privacy: Page = {
     },
   ],
   faq: [],
-  related: ['auto-track', 'fortnite-replay-files', 'faq'],
+  related: ['fortnite-replay-files', 'treasure-hunters-odds', 'faq'],
 }

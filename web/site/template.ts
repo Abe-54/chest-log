@@ -34,7 +34,6 @@ const FOOTER = [
   { slug: 'treasure-hunters-odds', text: 'Token odds' },
   { slug: 'fortnite-replay-files', text: 'Replay files', short: 'Replay files' },
   { slug: 'treasure-hours', text: 'Treasure Hours' },
-  { slug: 'auto-track', text: 'Auto-track' },
   { slug: 'faq', text: 'FAQ' },
   { slug: 'privacy', text: 'Privacy' },
 ] as const

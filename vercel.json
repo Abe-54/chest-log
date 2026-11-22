@@ -6,6 +6,16 @@
   "outputDirectory": "web/dist-hosted",
   "redirects": [
     {
+      "source": "/auto-track",
+      "destination": "/fortnite-replay-files/",
+      "permanent": true
+    },
+    {
+      "source": "/auto-track/",
+      "destination": "/fortnite-replay-files/",
+      "permanent": true
+    },
+    {
       "source": "/app",
       "destination": "/app/",
       "permanent": true

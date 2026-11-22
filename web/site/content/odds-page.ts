@@ -127,6 +127,6 @@ export const oddsPage: Page = {
     },
   ],
   faq: pick('odds', 'howMany', 'shared', 'hours', 'teammates'),
-  related: ['treasure-hours', 'auto-track', 'fortnite-replay-files', 'faq'],
+  related: ['treasure-hours', 'fortnite-replay-files', 'faq'],
   script,
 }

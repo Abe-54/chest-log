@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createFileRoute, redirect, useNavigate, useRouter } from '@tanstack/react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSelector } from '@tanstack/react-store'
@@ -6,26 +6,18 @@ import { Check, Copy, Folder, Lock, Trash2, Upload } from 'lucide-react'
 import { weekQuery } from '~/lib/queries'
 import { base, demo, hosted } from '~/lib/mode'
 import { celebrationStore } from '~/lib/live'
-import { useNow } from '~/lib/now'
-import { plural, timeOfDay } from '~/lib/format'
+import { plural } from '~/lib/format'
 import { getValue } from '~/library/db'
-import { canPickFolder, chooseFolder, droppedFiles, filesIn, forgetLibrary, importReplays, importStore, type ImportOutcome, type ImportState } from '~/library/import'
-import { CHECK_EVERY_MS, forgetWatching, resumeWatching, startWatching, stopWatching, watchStore, type WatchState } from '~/library/watch'
+import { droppedFiles, forgetLibrary, importReplays, importStore, type ImportOutcome, type ImportState } from '~/library/import'
 import { cn } from '~/lib/cn'
 
 const DEMOS = '%LOCALAPPDATA%\\FortniteGame\\Saved\\Demos'
-/**
- * Chrome and Edge refuse to let a website keep access to anything inside AppData, which is where Fortnite saves replays.
- * Reading the folder once still works through the plain folder picker; watching it needs the folder moved out and linked back.
- */
-const MOVED = '%USERPROFILE%\\FortniteReplays'
-const MOVE_COMMANDS = `move "${DEMOS}" "${MOVED}"\nmklink /J "${DEMOS}" "${MOVED}"`
 
 export const Route = createFileRoute('/track')({
   beforeLoad: () => {
     if (!hosted) throw redirect({ to: '/' })
   },
-  head: () => ({ meta: [{ title: 'Auto-track · Chest Log' }] }),
+  head: () => ({ meta: [{ title: 'Add matches · Chest Log' }] }),
   component: () => demo ? <LeaveDemo /> : <TrackPage />,
 })
 
@@ -41,7 +33,6 @@ const small = 'press inline-flex h-9 items-center justify-center gap-2 rounded-b
 
 function TrackPage() {
   const state = useSelector(importStore, value => value)
-  const watch = useSelector(watchStore, value => value)
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const router = useRouter()
@@ -64,18 +55,8 @@ function TrackPage() {
   }
   const addFiles = (files: File[]) => void importReplays(files).then(finish)
 
-  /** Reads the Demos folder once. The plain folder picker is the only one Chrome lets open AppData. */
-  const importDemos = () => folderInput.current?.click()
-  /** Watches a folder outside AppData: the one the Demos folder was moved to. */
-  const chooseDemos = async () => {
-    if (!canPickFolder) return folderInput.current?.click()
-    const folder = await chooseFolder()
-    if (!folder) return
-    const outcome = await importReplays(await filesIn(folder))
-    // An empty or still-recording Demos folder is still the right one to watch: the next match lands there.
-    startWatching(folder)
-    await finish(outcome)
-  }
+  /** The plain folder picker: Chrome's folder-access picker refuses anything in AppData, where the Demos folder lives. */
+  const chooseDemos = () => folderInput.current?.click()
   const fromInput = (input: HTMLInputElement) => {
     addFiles([...(input.files ?? [])])
     input.value = ''
@@ -91,10 +72,10 @@ function TrackPage() {
         setOver(false)
         if (!busy) void droppedFiles(event.dataTransfer.items).then(addFiles)
       }}>
-      <h1 className="display text-[44px] md:text-display-lg">Auto-track</h1>
+      <h1 className="display text-[44px] md:text-display-lg">{week ? 'Add matches' : 'Count my chests'}</h1>
       <p className="mt-3 max-w-[640px] text-[15px] leading-[22px] text-mist md:text-[17px] md:leading-[26px]">
         <span className="md:hidden">Chest Log reads your Fortnite Demos folder on a Windows PC.</span>
-        <span className="max-md:hidden">Pick your Fortnite Demos folder and Chest Log counts every match in it. Pick it again after you play, or set it up once below to add new matches automatically.</span>
+        <span className="max-md:hidden">Pick your Fortnite Demos folder and Chest Log counts every match in it. After you play, pick it again to add the new ones.</span>
       </p>
       {!week && (
         <p className="mt-3 text-[15px] text-mist">Just looking? <a href={`${base}demo`} className="font-semibold text-gold hover:text-bone">Try the demo library</a>.</p>
@@ -103,9 +84,7 @@ function TrackPage() {
       <div className="mt-6 grid items-start gap-6 md:mt-10 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:grid-cols-[minmax(0,1fr)_440px]">
         <div className="grid gap-6">
           {state.phase === 'error' && <p role="alert" className="rounded-[10px] bg-coral/15 px-4 py-3 text-[15px] font-semibold text-coral">{state.message}</p>}
-          {canPickFolder
-            ? <WatchPanel watch={watch} state={state} matches={week ? week.realMatches + week.stubs : null} onImport={importDemos} onChoose={() => void chooseDemos()} />
-            : <NoFolderPanel state={state} onFiles={chooseFiles} onFolder={importDemos} />}
+          <AddPanel state={state} matches={week ? week.realMatches + week.stubs : null} onFolder={chooseDemos} />
         </div>
         <DropZone over={over} busy={busy} onFiles={chooseFiles} />
         <input ref={folderInput} type="file" hidden multiple {...{ webkitdirectory: '' }} onChange={event => fromInput(event.currentTarget)} />
@@ -125,7 +104,7 @@ function TrackPage() {
             Choose the Demos folder. Paste this into the address bar of the window that opens, press Enter, then select the folder.
             <CopyPath className="mt-2" boxed />
           </Step>
-          <Step n={3}>{canPickFolder ? <>Leave this tab open while you play. New matches show up here and in your library.</> : <>Come back after you play and pick the folder again.</>}</Step>
+          <Step n={3}>After you play, come back and pick the folder again. Matches already counted are skipped.</Step>
         </ol>
         <p className="mt-5 text-sm text-dim">Replays only exist on PC. Fortnite on console and phone does not save them as files.</p>
       </section>
@@ -143,7 +122,7 @@ function TrackPage() {
           )}
           <p className="mt-4 max-w-xl text-[15px] text-mist">Everything this site knows about your matches is stored in this browser. Deleting it here removes it for good. Your replay files are not touched.</p>
           <button type="button"
-            onClick={() => { if (confirm('Delete your Chest Log library from this browser?')) void forgetWatching().then(forgetLibrary).then(() => queryClient.resetQueries()).then(() => router.invalidate()) }}
+            onClick={() => { if (confirm('Delete your Chest Log library from this browser?')) void forgetLibrary().then(() => queryClient.resetQueries()).then(() => router.invalidate()) }}
             className="press mt-4 inline-flex h-10 items-center gap-2 rounded-button border border-line px-4 text-sm font-semibold text-coral hover:border-coral">
             <Trash2 className="size-4" aria-hidden /> Delete my library
           </button>
@@ -153,155 +132,33 @@ function TrackPage() {
   )
 }
 
-const topBar: Record<WatchState['phase'], string> = { off: '', watching: 'border-t-4 border-t-live', paused: 'border-t-4 border-t-rarity-legendary' }
-
-/** The Demos folder: pick it, watch it, or pick it back up. While replays are being read, their progress takes the panel. */
-function WatchPanel({ watch, state, matches, onImport, onChoose }: { watch: WatchState; state: ImportState; matches: number | null; onImport: () => void; onChoose: () => void }) {
-  return (
-    <section aria-labelledby="watch-title"
-      className={cn('grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-5 rounded-panel border border-line bg-ink-2 p-5 md:grid-cols-[auto_minmax(0,1fr)_auto] md:p-8', topBar[watch.phase])}>
-      {watch.phase === 'watching'
-        ? <WatchStatus state={watch} />
-        : <>
-            <FolderGlyph className={cn('size-11 md:size-14', watch.phase === 'paused' ? 'text-rarity-legendary' : 'text-gold')} />
-            <div className="min-w-0">
-              <h2 id="watch-title" className="display text-[30px] leading-none md:text-[40px]">{watch.phase === 'paused' ? 'Resume watching' : 'Pick your Demos folder'}</h2>
-              <p className="mt-1.5 text-[15px] text-mist">
-                {watch.phase === 'paused'
-                  ? watch.reason ?? 'Chest Log remembers this folder. Your browser wants a click before reading it again.'
-                  : 'Chest Log reads every replay in it. Pick it again after you play to add new matches.'}
-              </p>
-            </div>
-          </>}
-      {watch.phase === 'watching' && (
-        <button type="button" onClick={stopWatching} className={cn(small, 'max-md:order-last max-md:col-span-2 max-md:h-12 max-md:text-base md:col-start-3 md:row-start-1')}>Stop watching</button>
-      )}
-      {state.phase === 'parsing' || state.phase === 'building'
-        ? <Progress state={state} />
-        : watch.phase === 'off'
-          ? <>
-              <div className="col-span-full flex flex-wrap items-center gap-x-5 gap-y-3">
-                <button type="button" onClick={onImport} className={primary}>Choose Demos folder</button>
-                <CopyPath />
-              </div>
-              <KeepWatching onChoose={onChoose} />
-            </>
-          : <>
-              <div className="col-span-full flex items-center gap-4 rounded-[10px] bg-ink p-4">
-                <FolderGlyph className="size-7 shrink-0 text-gold" filled />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-base font-bold">{watch.folder}</span>
-                  <span className="block truncate text-[13px] text-dim">
-                    {matches === null ? 'No matches yet' : `${plural(matches, 'match', 'matches')} counted`}<span className="max-md:hidden"> · remembered by this browser</span>
-                  </span>
-                </span>
-                <button type="button" onClick={onChoose} className="shrink-0 text-sm font-semibold text-gold hover:text-bone">
-                  Change<span className="max-md:hidden"> folder</span>
-                </button>
-              </div>
-              {watch.phase === 'paused' && (
-                <div className="col-span-full">
-                  <button type="button" onClick={() => void resumeWatching()} className={primary}>Resume watching “{watch.folder}”</button>
-                </div>
-              )}
-              {watch.phase === 'watching' && <Session state={watch} />}
-              <p className="col-span-full text-[13px] text-dim max-md:hidden">Keep this tab open while you play. Chrome and Edge remember the folder between visits. Other browsers can still drop files on the right.</p>
-            </>}
-    </section>
-  )
-}
-
 /**
- * Chrome and Edge show "Can't open this folder because it contains system files" for anything in AppData.
- * Moving Demos out and leaving a link (a junction) in its place lets Fortnite keep saving there and lets Chest Log watch it.
+ * The Demos folder, picked after each session. Browsers will not let a website keep access to it (Windows keeps it in AppData),
+ * so this is the whole flow: one click, and matches already counted are skipped. While replays are read, progress takes the panel.
  */
-function KeepWatching({ onChoose }: { onChoose: () => void }) {
+function AddPanel({ state, matches, onFolder }: { state: ImportState; matches: number | null; onFolder: () => void }) {
   const [copied, setCopied] = useState(false)
+  const returning = matches !== null
   return (
-    <details className="col-span-full rounded-[10px] border border-line-soft bg-ink p-4 text-[15px] text-mist max-md:hidden">
-      <summary className="cursor-pointer font-bold text-bone">Add new matches automatically</summary>
-      <p className="mt-3 max-w-2xl">Chrome and Edge won’t let a website watch folders inside AppData, where Fortnite saves replays. Move the folder once and leave a link in its place: Fortnite keeps saving to the same path, and Chest Log can watch the new one.</p>
-      <ol className="mt-3 max-w-2xl list-decimal space-y-2 pl-5">
-        <li>Close Fortnite, then open Command Prompt.</li>
-        <li>
-          Paste these two lines and press Enter.
-          <span className="mt-2 flex items-start gap-3 rounded-[10px] border border-line-soft bg-ink-deep px-3 py-2">
-            <code className="min-w-0 flex-1 whitespace-pre-wrap break-all font-mono text-[13px] text-dim">{MOVE_COMMANDS}</code>
-            <button type="button" aria-label="Copy the two commands" className="flex shrink-0 items-center gap-1 text-xs font-semibold text-mist hover:text-bone"
-              onClick={() => void navigator.clipboard.writeText(MOVE_COMMANDS).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500) })}>
-              {copied ? <><Check className="size-3.5 text-kelp" aria-hidden />Copied</> : <Copy className="size-3.5" aria-hidden />}
-            </button>
-          </span>
-        </li>
-        <li>Choose the moved folder, <code className="font-mono text-[13px] text-bone">{MOVED}</code>, here. Chest Log then checks it every 30 seconds while this tab is open.</li>
-      </ol>
-      <button type="button" onClick={onChoose} className={cn(secondary, 'mt-4')}>Watch the moved folder</button>
-    </details>
-  )
-}
-
-const RING = 2 * Math.PI * 24
-
-function WatchStatus({ state }: { state: Extract<WatchState, { phase: 'watching' }> }) {
-  const now = useNow(1000)
-  const since = state.checkedAt === null ? null : Math.max(0, now - state.checkedAt)
-  const next = since === null ? null : Math.max(0, Math.ceil((CHECK_EVERY_MS - since) / 1000))
-  return (
-    <>
-      <svg viewBox="0 0 56 56" aria-hidden className="size-11 -rotate-90 motion-reduce:hidden md:size-14">
-        <circle cx="28" cy="28" r="24" fill="none" strokeWidth="5" className="stroke-line" />
-        {state.checkedAt !== null && (
-          <circle key={state.checkedAt} cx="28" cy="28" r="24" fill="none" strokeWidth="5" strokeLinecap="round" className="stroke-live"
-            strokeDasharray={RING} style={{ '--ring': RING, animation: `ring-down ${CHECK_EVERY_MS}ms linear both`, animationDelay: `-${since}ms` } as CSSProperties} />
-        )}
-        <circle cx="28" cy="28" r="7" className="fill-live" />
-      </svg>
-      <div className="min-w-0 motion-reduce:col-span-2 md:motion-reduce:col-span-1">
-        <h2 id="watch-title" className="display text-[32px] leading-none md:text-[40px]">Watching</h2>
-        <p role="status" className="num mt-1.5 text-sm font-semibold text-rarity-uncommon-text md:text-base">
-          {next === null ? 'Checking now…' : <>Next check in {next} s<span className="max-md:hidden"> · checked {Math.round(since! / 1000)} s ago</span></>}
+    <section aria-labelledby="add-title" className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 gap-y-5 rounded-panel border border-line bg-ink-2 p-5 md:p-8">
+      <FolderGlyph className="size-11 text-gold md:size-14" />
+      <div className="min-w-0">
+        <h2 id="add-title" className="display text-[30px] leading-none md:text-[40px]">{returning ? 'Add new matches' : 'Pick your Demos folder'}</h2>
+        <p className="mt-1.5 text-[15px] text-mist">
+          {returning
+            ? <>{plural(matches, 'match', 'matches')} counted so far. Choose the folder after you play; the ones already counted are skipped.</>
+            : 'Chest Log reads every replay in it. After you play, choose it again to add the new ones.'}
         </p>
       </div>
-    </>
-  )
-}
-
-function Session({ state }: { state: Extract<WatchState, { phase: 'watching' }> }) {
-  return (
-    <div className="col-span-full">
-      <h3 className="caps text-dim max-md:sr-only">This session</h3>
-      <ol className="mt-3 border-t border-line-soft">
-        {state.session.map(entry => (
-          <li key={entry.at} className="flex items-center gap-4 border-b border-line-soft py-4 motion-safe:animate-[caption-in_240ms_var(--ease-out)]">
-            <span className="display num w-16 shrink-0 text-[28px] leading-none text-gold motion-safe:animate-[chest-pop_650ms_var(--ease-pop)_both]">+{entry.gained}</span>
-            <span className="min-w-0 flex-1 text-[15px] font-semibold">{entry.added === 1 ? 'New match added' : `${entry.added} new matches added`}</span>
-            <time className="shrink-0 text-[13px] text-dim">{timeOfDay(new Date(entry.at).toISOString())}</time>
-          </li>
-        ))}
-        {state.session.length === 0 && (
-          <li className="border-b border-line-soft py-4 text-[15px] text-mist-2">No new matches yet. Each one shows up here a few seconds after it ends.</li>
-        )}
-      </ol>
-    </div>
-  )
-}
-
-/** Browsers without folder access: phones, Safari, Firefox. Files still work, and the link travels to a PC. */
-function NoFolderPanel({ state, onFiles, onFolder }: { state: ImportState; onFiles: () => void; onFolder: () => void }) {
-  const [copied, setCopied] = useState(false)
-  return (
-    <section aria-labelledby="no-folder" className="rounded-panel border border-line border-l-4 border-l-rarity-rare bg-ink-2 p-5 md:p-7">
-      <h2 id="no-folder" className="display text-[26px] leading-none">This browser can’t watch a folder</h2>
-      <p className="mt-3 text-[15px] leading-[22px] text-mist">Chrome or Edge on a computer can check your Demos folder every 30 seconds. Here you can still pick replay files by hand.</p>
       {state.phase === 'parsing' || state.phase === 'building'
-        ? <div className="mt-5 grid"><Progress state={state} /></div>
-        : <div className="mt-5 grid grid-cols-2 gap-3 md:flex md:flex-wrap">
-            <button type="button" onClick={onFiles} className={primary}>Choose files</button>
-            <button type="button" className={secondary}
+        ? <Progress state={state} />
+        : <div className="col-span-full flex flex-wrap items-center gap-x-5 gap-y-3">
+            <button type="button" onClick={onFolder} className={primary}>{returning ? 'Add new matches' : 'Choose Demos folder'}</button>
+            <CopyPath className="max-md:hidden" />
+            <button type="button" className={cn(secondary, 'md:hidden')}
               onClick={() => void navigator.clipboard.writeText(location.href).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500) })}>
               {copied ? 'Link copied' : 'Copy link for PC'}
             </button>
-            <button type="button" onClick={onFolder} className="text-sm font-semibold text-gold hover:text-bone max-md:hidden">Pick a whole folder</button>
           </div>}
     </section>
   )
@@ -313,8 +170,8 @@ function DropZone({ over, busy, onFiles }: { over: boolean; busy: boolean; onFil
       className={cn('flex min-h-80 flex-col items-center justify-center gap-4 rounded-panel border-2 p-8 text-center transition-colors duration-150 max-md:hidden md:self-stretch',
         over ? 'border-solid border-gold bg-gold/8' : 'border-dashed border-line-strong', busy && 'pointer-events-none opacity-50')}>
       <Upload className="size-9 text-gold" strokeWidth={2} aria-hidden />
-      <h2 id="drop-title" className="display text-[32px] leading-none">{over ? 'Drop to count' : 'Drop a replay here'}</h2>
-      <p className="text-[15px] text-mist">One .replay file or a few. Works in every browser.</p>
+      <h2 id="drop-title" className="display text-[32px] leading-none">{over ? 'Drop to count' : 'Or drop it here'}</h2>
+      <p className="text-[15px] text-mist">The Demos folder or a few .replay files.</p>
       <button type="button" onClick={onFiles} disabled={busy} className={small}>Choose files</button>
       <CopyPath className="mt-2" />
     </section>

@@ -75,5 +75,5 @@ export const hours: Page = {
       a: `Epic announces each one on its ${link('https://communities.epicgames.com/', 'Fortnite Communities page')} and on ${link('https://x.com/FortniteStatus', 'Fortnite Status')}. We do not list times here because Epic can change them.`,
     },
   ],
-  related: ['treasure-hunters-odds', 'fortnite-replay-files', 'faq', 'auto-track'],
+  related: ['treasure-hunters-odds', 'fortnite-replay-files', 'faq'],
 }

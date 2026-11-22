@@ -21,13 +21,13 @@ const check = (ok: boolean, label: string) => {
 const path = () => new URL(page.url()).pathname
 const shot = async (name: string) => { if (shots) await page.screenshot({ path: `${shots}/${name}.png`, fullPage: true }) }
 
-// An empty browser has no library, so every page sends it to Auto-track.
+// An empty browser has no library, so every page sends it to the page that adds matches.
 for (const start of ['/', '/import', '/matches']) {
   await page.goto(site + start, { waitUntil: 'networkidle' })
   check(path() === '/app/track', `/app${start === '/' ? '/' : start} lands on /app/track`)
 }
-check(await page.getByRole('heading', { name: 'Pick your Demos folder' }).isVisible(), 'Auto-track offers the Demos folder')
-check(await page.getByRole('heading', { name: 'Drop a replay here' }).isVisible(), 'Auto-track offers a single replay')
+check(await page.getByRole('heading', { name: 'Pick your Demos folder' }).isVisible(), 'the add page offers the Demos folder')
+check(await page.getByRole('heading', { name: 'Or drop it here' }).isVisible(), 'the add page offers a single replay')
 check((await page.locator('code').filter({ hasText: 'FortniteGame' }).first().innerText()).includes('%LOCALAPPDATA%\\FortniteGame\\Saved\\Demos'), 'it names the Demos folder')
 await shot('track')
 
@@ -36,22 +36,10 @@ await page.locator('input[type=file][accept=".replay"]').setInputFiles({ name: '
 await page.getByText('None of those files held a finished match.').waitFor({ timeout: 120_000 })
 check(true, 'the replay reader booted from /app/engine and refused a file that is not a replay')
 
-// A watched folder. The browser's own private file system stands in for the Demos folder: it is a real folder handle.
-await page.evaluate(async () => {
-  const folder = await navigator.storage.getDirectory()
-  const writable = await (await folder.getFileHandle('not-a-replay.replay', { create: true })).createWritable()
-  await writable.write(new Uint8Array(6000))
-  await writable.close()
-  window.showDirectoryPicker = async () => folder
-})
+// The Demos folder goes through the plain folder picker, the one Chrome lets open AppData. Choosing it opens that input.
+const chooser = page.waitForEvent('filechooser')
 await page.getByRole('button', { name: 'Choose Demos folder' }).click()
-const status = page.getByRole('status')
-await status.getByText(/Next check in \d+ s · checked \d+ s ago/).waitFor({ timeout: 30_000 })
-check(true, `watching shows "${(await status.innerText()).split('\n')[0]}"`)
-check(await page.getByRole('button', { name: 'Stop watching' }).isVisible(), 'watching offers a stop button')
-await shot('watching')
-await page.getByRole('button', { name: 'Stop watching' }).click()
-check(await page.getByRole('button', { name: /^Resume/ }).isVisible(), 'stopping leaves a resume button')
+check((await chooser).isMultiple() && (await page.locator('input[type=file][webkitdirectory]').count()) === 1, 'Choose Demos folder opens the folder picker')
 
 // The demo is the same app one level deeper, reading the published library instead of this browser's.
 await page.goto(site + '/track', { waitUntil: 'networkidle' })
@@ -63,7 +51,7 @@ check(await page.getByText('Demo library').isVisible() && (await page.getByRole(
 check(!(await page.getByRole('link', { name: 'Add replays' }).count()), 'the demo has no way to add replays')
 await shot('demo-week')
 
-await page.getByRole('navigation', { name: 'Main' }).first().getByRole('link', { name: 'Matches' }).click()
+await page.getByRole('navigation', { name: 'Main' }).first().getByRole('link', { name: 'Matches', exact: true }).click()
 await page.waitForURL('**/app/demo/matches')
 await page.getByRole('heading', { name: 'Matches', exact: true }).waitFor()
 const first = page.getByRole('link').filter({ hasText: /with Squadmate/ }).first()
