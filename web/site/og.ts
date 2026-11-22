@@ -1,44 +1,48 @@
 import { readFile, writeFile } from 'node:fs/promises'
-import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { launchBrowser } from './browser.ts'
 import { SITE } from './config.ts'
+import { fontFaceCss, fontPath } from './fonts.ts'
+import { islandArt, logoMark } from './template.ts'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const require = createRequire(import.meta.url)
-const fontData = async (pkg: string, file: string) =>
-  `data:font/woff2;base64,${(await readFile(join(dirname(require.resolve(`${pkg}/package.json`)), 'files', file))).toString('base64')}`
-
 const css = await readFile(join(here, 'site.css'), 'utf8')
-const tokens = css.slice(0, css.indexOf('/* Fonts'))
+const fonts = new Map<string, string>()
+for (const file of ['barlow-condensed-latin-900-italic.woff2', 'barlow-latin-500-normal.woff2', 'barlow-latin-700-normal.woff2']) {
+  fonts.set(file, `data:font/woff2;base64,${(await readFile(join(here, 'assets', 'fonts', file))).toString('base64')}`)
+}
 const host = new URL(SITE.origin).host
 
 const page = `<!doctype html><meta charset="utf-8"><style>
-${tokens}
-@font-face { font-family: 'Anybody Variable'; font-weight: 100 900; font-stretch: 50% 150%; src: url(${await fontData('@fontsource-variable/anybody', 'anybody-latin-wdth-normal.woff2')}) format('woff2'); }
-@font-face { font-family: 'Schibsted Grotesk Variable'; font-weight: 400 900; src: url(${await fontData('@fontsource-variable/schibsted-grotesk', 'schibsted-grotesk-latin-wght-normal.woff2')}) format('woff2'); }
-* { box-sizing: border-box; margin: 0; }
-body { width: 1200px; height: 630px; padding: 64px 72px; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(70% 90% at 12% 0, var(--c-glow), transparent), var(--c-bg); color: var(--c-text); font-family: var(--font-body); }
-.top { display: flex; justify-content: space-between; align-items: center; font-size: 30px; color: var(--c-text-soft); }
-.brand { display: flex; align-items: center; gap: 16px; color: var(--c-text); font-family: var(--font-display); font-weight: var(--display-weight); font-variation-settings: 'wdth' var(--display-width); font-size: 44px; }
-h1 { font-family: var(--font-display); font-weight: var(--display-weight); font-variation-settings: 'wdth' var(--display-width); font-size: 132px; line-height: var(--display-leading); letter-spacing: var(--display-tracking); max-width: 1000px; }
-h1 em { font-style: normal; color: var(--c-accent); }
-.foot { font-size: 32px; color: var(--c-text-soft); }
+${fontFaceCss(face => fonts.get(face.file) ?? fontPath(face)).replaceAll('font-display:optional', 'font-display:block')}
+${css}
+body { display: block; width: ${SITE.ogImage.width}px; height: ${SITE.ogImage.height}px; min-height: 0; overflow: hidden; background: radial-gradient(640px 520px at 900px 330px, var(--c-storm-glow), transparent 70%), linear-gradient(160deg, var(--c-ink) 0, var(--c-band) 100%); }
+.og { position: relative; height: 100%; padding: 48px 64px; }
+.og .top { display: flex; justify-content: space-between; align-items: center; }
+.og .brand { font-size: 40px; }
+.og .host { color: var(--c-mist); font: 600 24px / 1 var(--font-body); }
+.og h1 { position: relative; z-index: 1; margin-top: 40px; font-size: 94px; line-height: 80px; letter-spacing: -0.01em; text-shadow: var(--shadow-numeral); }
+.og h1 span { color: var(--c-gold); }
+.og .og-foot { position: absolute; left: 64px; bottom: 48px; margin: 0; color: var(--c-prose); font: 500 25px / 1.3 var(--font-body); max-width: 560px; }
+.og .og-foot strong { color: var(--c-bone); font-weight: 700; }
+.og .hero-art { top: 86px; right: 28px; width: 520px; }
+.og .loot { padding: 12px 16px 14px; }
+.og .loot strong { font-size: 48px; line-height: 44px; }
 </style>
-<div class="top"><div class="brand"><svg width="56" height="56" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="${tokensColor('--mark-bg')}"/><path d="M7 13h18v11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z" fill="${tokensColor('--mark-body')}"/><path d="M7 13a9 6 0 0 1 18 0" fill="${tokensColor('--mark-lid')}"/><rect x="14" y="15" width="4" height="5" rx="1" fill="${tokensColor('--mark-bg')}"/></svg>${SITE.name}</div><span>${host}</span></div>
-<h1>Every chest, every match, <em>replayed on the map</em></h1>
-<div class="foot">No download. Nothing uploaded. Your own Pirate token odds.</div>`
-
-function tokensColor(name: string) {
-  return new RegExp(`${name}:\\s*([^;]+);`).exec(tokens)![1]!.trim()
-}
+<div class="og"><div class="top"><span class="brand">${logoMark}<span>${SITE.name}</span></span><span class="host">${host}</span></div>
+<h1>Every chest,<br>every match,<br><span>replayed on<br>the map.</span></h1>
+<p class="og-foot"><strong>No download. Nothing uploaded.</strong> Your own Pirate token odds.</p>
+${islandArt()}</div>`
 
 const browser = await launchBrowser()
 const tab = await browser.newPage({ viewport: { width: SITE.ogImage.width, height: SITE.ogImage.height } })
 await tab.setContent(page)
-await tab.evaluate(() => document.fonts.ready)
+await tab.evaluate(async () => {
+  await Promise.all(['italic 900 100px "Barlow Condensed"', '500 26px Barlow', '700 26px Barlow'].map(font => document.fonts.load(font)))
+  await document.fonts.ready
+})
 await writeFile(join(here, 'assets', 'og.png'), await tab.screenshot({ type: 'png' }))
 await browser.close()
 
