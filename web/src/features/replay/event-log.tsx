@@ -1,19 +1,14 @@
 import { memo, useEffect, useMemo, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useSelector } from '@tanstack/react-store'
-import { Bus, Flag, Gem, MapPin, Package, RotateCcw, Skull, Swords, Wind, type LucideIcon } from 'lucide-react'
-import type { EventKind, MatchEvent } from '~/data'
+import type { MatchEvent } from '~/data'
 import type { Rgb } from '~/features/map/palette'
 import { clock } from '~/lib/format'
 import { cn } from '~/lib/cn'
-import { colorOf, lastAtOrBefore } from './model'
+import { colorOf, isChestEvent, lastAtOrBefore } from './model'
 import type { PlaybackStore } from './playback'
 
-const icons: Record<EventKind, LucideIcon> = {
-  chest: Gem, rare_chest: Gem, ammo_box: Package, container: Package, knock: Swords, elimination: Skull,
-  bus: Bus, jump: Wind, landed: MapPin, reboot: RotateCcw, death: Skull, end: Flag,
-}
-const ROW = 56
+const ROW = 44
 
 interface Props {
   events: MatchEvent[]
@@ -36,7 +31,7 @@ export function EventLog({ events, store, selected, onChoose, colors, className 
     if (active >= 0 && !scrubbing) virtualizer.scrollToIndex(active, { align: 'center' })
   }, [active, scrubbing, virtualizer])
 
-  if (!events.length) return <p className="px-4 py-8 text-sm text-mist">Nothing in the layers you have on.</p>
+  if (!events.length) return <p className="px-5 py-8 text-[15px] text-mist">Nothing in the layers you have on.</p>
   return (
     <div ref={scroller} className={cn('overflow-y-auto overscroll-contain', className)} role="list" aria-label="Match events">
       <div className="relative" style={{ height: virtualizer.getTotalSize() }}>
@@ -49,11 +44,14 @@ export function EventLog({ events, store, selected, onChoose, colors, className 
   )
 }
 
+/** Who did it, shown at the end of the row when it is not you, and for fights, who hit whom. */
+const byline = (event: MatchEvent) => event.actor !== 'me' || event.kind === 'knock' || event.kind === 'elimination' ? event.detail : null
+
 const EventRow = memo(function EventRow({ event, top, state, selected, onChoose, colors }: {
   event: MatchEvent; top: number; state: 'past' | 'now' | 'later'; selected: boolean; onChoose: (event: MatchEvent) => void; colors?: Map<string, Rgb>
 }) {
-  const Icon = icons[event.kind]
   const [r, g, b] = colorOf(event, colors)
+  const who = byline(event)
   return (
     <div role="listitem" className="absolute inset-x-0" style={{ top, height: ROW }}>
       <button
@@ -62,20 +60,15 @@ const EventRow = memo(function EventRow({ event, top, state, selected, onChoose,
         aria-pressed={selected}
         onClick={() => onChoose(event)}
         className={cn(
-          'press flex size-full items-center gap-3 px-3 text-left hover:bg-ink-3/60',
-          state === 'later' && 'opacity-45',
-          state === 'now' && 'bg-ink-3',
-          selected && 'bg-ink-3 ring-1 ring-inset ring-bone/40',
+          'flex size-full items-center gap-3 border-b border-l-[3px] border-b-line-soft border-l-transparent pr-5 pl-[17px] text-left hover:bg-ink-3/60',
+          state === 'now' && 'border-l-gold bg-gold/12 max-lg:bg-ink-3',
+          selected && 'ring-1 ring-bone/40 ring-inset',
         )}
       >
-        <span className="grid size-8 shrink-0 place-items-center rounded-lg" style={{ background: `rgb(${r} ${g} ${b} / 0.14)`, color: `rgb(${r} ${g} ${b})` }}>
-          <Icon className="size-4" strokeWidth={2.4} aria-hidden />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-semibold">{event.label}</span>
-          <span className="block truncate text-xs text-mist">{event.detail}</span>
-        </span>
-        <time className="num shrink-0 text-xs text-mist">{clock(event.t)}</time>
+        <time className={cn('num w-10 shrink-0 text-sm', state === 'now' ? 'font-bold text-gold' : 'font-semibold text-dim')}>{clock(event.t)}</time>
+        <span aria-hidden className={cn('size-2.5 shrink-0', isChestEvent(event) ? 'rotate-45 rounded-[2px]' : 'rounded-full')} style={{ background: `rgb(${r} ${g} ${b})` }} />
+        <span className={cn('min-w-0 flex-1 truncate text-[15px]', state === 'now' ? 'font-bold' : state === 'later' ? 'font-medium text-mist-2' : 'font-semibold')}>{event.label}</span>
+        {who && <span className="max-w-[45%] shrink-0 truncate text-[13px] font-semibold text-dim">{who}</span>}
       </button>
     </div>
   )

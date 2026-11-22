@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import type { Match, MatchEvent, Track } from '~/data'
+import type { Match, MatchEvent, StormFrame, Track } from '~/data'
 import { rgb, squadColors } from '../map/palette'
-import { colorOf, defaultTracked, squadMembers } from './model'
+import { colorOf, defaultTracked, squadMembers, stormTag } from './model'
 
 const track = (name: string): Track => ({ name, segments: [] })
 const match = (overrides: Partial<Match>) => ({
@@ -29,5 +29,19 @@ describe('squad members', () => {
     const chest = { kind: 'chest', actor: 'team', detail: 'Squadmate 2' } as MatchEvent
     expect(colorOf(chest, new Map([['Squadmate 2', squadColors[2]]]))).toEqual(squadColors[2])
     expect(colorOf(chest)).toEqual(rgb.kelp)
+  })
+})
+
+describe('storm tag', () => {
+  const frames: StormFrame[] = [
+    { t: 118, from: null, to: [0, 0, 500], shrinkStart: 218, shrinkEnd: 308 },
+    { t: 308.3, from: null, to: [0, 0, 400], shrinkStart: 378, shrinkEnd: 468 },
+  ]
+  it('names the zone and counts down to its next change', () => {
+    expect(stormTag(frames, 60)).toBeNull()
+    expect(stormTag(frames, 200)).toBe('Zone 1 closes in 0:18')
+    expect(stormTag(frames, 236)).toBe('Zone 1 closing · 1:12')
+    expect(stormTag(frames, 400)).toBe('Zone 2 closing · 1:08')
+    expect(stormTag(frames, 500)).toBe('Zone 2 closed')
   })
 })

@@ -24,6 +24,8 @@ function fitView(bounds: Bounds, width: number, height: number, minZoom: number)
 const background = (image: string) => new BitmapLayer({
   id: 'island-image', image, bounds: [0, MAP_SIZE, MAP_SIZE, 0],
   textureParameters: { minFilter: 'linear', magFilter: 'linear' },
+  // Pulls the island toward the storm palette so the paths and pins stand out on it.
+  desaturate: 0.35, tintColor: [190, 178, 235],
 })
 
 export interface IslandMapProps {
@@ -94,7 +96,7 @@ export function IslandMap({ layers, fit, follow, onRelease, onPick, label, class
   }))
 
   return (
-    <div ref={box} role="group" aria-label={label} className={cn('relative overflow-hidden bg-ink touch-none select-none', className)}>
+    <div ref={box} role="group" aria-label={label} className={cn('relative overflow-hidden bg-water touch-none select-none', className)}>
       {size && viewState && (
         <div role="img" aria-label={label} className="absolute inset-0">
           <DeckGL
@@ -130,10 +132,10 @@ function useEvent<A extends unknown[], R>(handler: (...args: A) => R) {
 
 const MapControls = memo(function MapControls({ onZoom, onReset }: { onZoom: (delta: number) => void; onReset: () => void }) {
   return (
-    <div className="absolute right-2 bottom-2 flex flex-col overflow-hidden rounded-xl border border-line/70 bg-ink/80 backdrop-blur">
+    <div className="absolute right-3 bottom-3 flex flex-col overflow-hidden rounded-button border border-line bg-ink/85 backdrop-blur">
       <button type="button" onClick={() => onZoom(0.75)} aria-label="Zoom in" className="press grid size-10 place-items-center text-mist hover:text-bone"><Plus className="size-4" /></button>
-      <button type="button" onClick={() => onZoom(-0.75)} aria-label="Zoom out" className="press grid size-10 place-items-center border-t border-line/70 text-mist hover:text-bone"><Minus className="size-4" /></button>
-      <button type="button" onClick={onReset} aria-label="Reset view" className="press grid size-10 place-items-center border-t border-line/70 text-mist hover:text-bone"><Scan className="size-4" /></button>
+      <button type="button" onClick={() => onZoom(-0.75)} aria-label="Zoom out" className="press grid size-10 place-items-center border-t border-line text-mist hover:text-bone"><Minus className="size-4" /></button>
+      <button type="button" onClick={onReset} aria-label="Reset view" className="press grid size-10 place-items-center border-t border-line text-mist hover:text-bone"><Scan className="size-4" /></button>
     </div>
   )
 })
