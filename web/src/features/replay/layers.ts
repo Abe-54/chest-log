@@ -17,7 +17,7 @@ const timeFilter = new DataFilterExtension({ filterSize: 1 })
 
 interface Runner { member: Member; segments: Trip[]; key: string }
 interface Dot { p: Px; member: Member; tracked: boolean }
-const label = '"Schibsted Grotesk Variable", system-ui, sans-serif'
+const label = 'Barlow, system-ui, sans-serif'
 
 /**
  * Tracked players draw their whole trail so far, a faint ghost of the rest, and a name label. Everyone else in the
@@ -63,16 +63,16 @@ export function useReplayLayers(match: Match, store: PlaybackStore, visible: Set
     const storm = visible.has('storm') ? stormAt(match.storm, time) : []
     const marks = new ScatterplotLayer<MatchEvent, DataFilterExtensionProps<MatchEvent>>({
       id: 'events', data: placed, getPosition: d => d.p!, pickable: true,
-      getFillColor: d => colorOf(d, colors), getLineColor: rgb.ink, stroked: true, lineWidthUnits: 'pixels', getLineWidth: 1.5,
-      radiusUnits: 'pixels', getRadius: d => layerOf(d) === 'milestone' ? 6.5 : d.actor === 'me' ? 5 : 3.8,
+      getFillColor: d => colorOf(d, colors), getLineColor: rgb.ink, stroked: true, lineWidthUnits: 'pixels', getLineWidth: d => d.actor === 'me' ? 2 : 1.5,
+      radiusUnits: 'pixels', getRadius: d => layerOf(d) === 'milestone' ? 6.5 : d.actor === 'me' ? 6 : 3.8,
       extensions: [timeFilter], getFilterValue: d => d.t, filterRange: [-1, time + 0.001],
       updateTriggers: { getFillColor: colors },
     })
     return [
       ...(visible.has('storm') ? [new ScatterplotLayer<(typeof storm)[number]>({
         id: 'storm', data: storm, getPosition: d => d.center, getRadius: d => d.radius, radiusUnits: 'common',
-        filled: false, stroked: true, lineWidthUnits: 'pixels', getLineWidth: d => d.next ? 1.2 : 2.4,
-        getLineColor: d => d.next ? alpha(rgb.bone, 0.55) : alpha(rgb.storm, 0.95),
+        filled: false, stroked: true, lineWidthUnits: 'pixels', getLineWidth: d => d.next ? 2 : 3,
+        getLineColor: d => d.next ? alpha(rgb.bone, 0.7) : rgb.storm,
         updateTriggers: { getPosition: time, getRadius: time },
       })] : []),
       ...(visible.has('bus') && stable.bus ? [stable.bus] : []),
@@ -84,8 +84,9 @@ export function useReplayLayers(match: Match, store: PlaybackStore, visible: Set
         filled: false, stroked: true, lineWidthUnits: 'pixels', getLineWidth: 2.5, getLineColor: rgb.bone,
       })] : []),
       new ScatterplotLayer<Dot>({
-        id: 'players', data: dots, getPosition: d => d.p, radiusUnits: 'pixels', getRadius: d => d.tracked ? 7 : 5,
-        getFillColor: d => d.member.color, stroked: true, getLineColor: rgb.ink, lineWidthUnits: 'pixels', getLineWidth: 2.5,
+        id: 'players', data: dots, getPosition: d => d.p, radiusUnits: 'pixels', getRadius: d => d.member.you ? 8 : d.tracked ? 7 : 5,
+        getFillColor: d => d.member.you ? rgb.bone : d.member.color, stroked: true,
+        getLineColor: d => d.member.you ? rgb.gold : rgb.ink, lineWidthUnits: 'pixels', getLineWidth: d => d.member.you ? 4 : 2.5,
       }),
       new TextLayer<Dot>({
         id: 'names', data: dots.filter(dot => dot.tracked), getPosition: d => d.p, getText: d => d.member.name,

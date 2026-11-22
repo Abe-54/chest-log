@@ -1,9 +1,8 @@
 import { memo, useEffect, useRef, type KeyboardEvent, type PointerEvent } from 'react'
 import { Link } from '@tanstack/react-router'
-import type { ClipRef, MatchEvent } from '~/data'
-import type { Rgb } from '~/features/map/palette'
+import type { ClipRef, MatchEvent, StormFrame } from '~/data'
 import { clock } from '~/lib/format'
-import { colorOf, layerOf } from './model'
+import { isMyChest, layerOf } from './model'
 import { seek, type PlaybackStore } from './playback'
 
 interface Props {
@@ -12,13 +11,14 @@ interface Props {
   events: MatchEvent[]
   clips: ClipRef[]
   onCommit: (time: number) => void
-  colors?: Map<string, Rgb>
+  storm: StormFrame[]
 }
 
-const css = ([r, g, b]: number[]) => `rgb(${r} ${g} ${b})`
+/** Ticks under the track: fights in coral, storm closings in storm-ring, milestones in bone. */
+const below = (event: MatchEvent) => layerOf(event) === 'combat' ? 'bg-coral' : layerOf(event) === 'milestone' ? 'bg-bone/80' : null
 
 /** Drives the store directly from pointer input and paints progress without React renders. */
-export const Scrubber = memo(function Scrubber({ store, duration, events, clips, onCommit, colors }: Props) {
+export const Scrubber = memo(function Scrubber({ store, duration, events, clips, onCommit, storm }: Props) {
   const track = useRef<HTMLDivElement>(null)
   const fill = useRef<HTMLDivElement>(null)
   const thumb = useRef<HTMLDivElement>(null)
@@ -31,9 +31,10 @@ export const Scrubber = memo(function Scrubber({ store, duration, events, clips,
       const { time } = store.state
       const fraction = duration ? time / duration : 0
       fill.current!.style.transform = `scaleX(${fraction})`
+      track.current!.style.setProperty('--progress', `${fraction * 100}%`)
       thumb.current!.style.transform = `translateX(${fraction * 100}%)`
       track.current!.setAttribute('aria-valuenow', time.toFixed(1))
-      track.current!.setAttribute('aria-valuetext', clock(time))
+      track.current!.setAttribute('aria-valuetext', spoken(time))
     }
     paint()
     const subscription = store.subscribe(paint)
@@ -86,6 +87,8 @@ export const Scrubber = memo(function Scrubber({ store, duration, events, clips,
   }
 
   const position = (t: number) => `${(t / duration) * 100}%`
+  const mine = events.filter(isMyChest)
+  const chestTicks = mine.map((event, i) => <span key={i} className="absolute top-0 h-2.5 w-0.5 rounded-pill bg-gold" style={{ left: position(event.t) }} />)
   return (
     <div className="select-none">
       {clips.length > 0 && (
@@ -110,28 +113,34 @@ export const Scrubber = memo(function Scrubber({ store, duration, events, clips,
         onPointerUp={up}
         onPointerCancel={up}
         onKeyDown={key}
-        className="group relative h-11 cursor-pointer touch-none rounded-lg outline-none [overflow:clip] [overflow-clip-margin:16px]"
+        className="group relative h-12 cursor-pointer touch-none outline-none [overflow:clip] [overflow-clip-margin:16px]"
       >
-        <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 overflow-hidden rounded-full bg-ink-3">
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-1.5 h-2.5 opacity-40">{chestTicks}</div>
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-1.5 h-2.5 [clip-path:inset(0_calc(100%-var(--progress,0%))_0_0)]">{chestTicks}</div>
+        <div className="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 overflow-hidden rounded-pill bg-ink-3">
           <div ref={fill} className="h-full origin-left bg-gold will-change-transform" style={{ transform: 'scaleX(0)' }} />
         </div>
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-full">
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-1.5 h-2.5">
           {events.map((event, i) => {
-            const milestone = layerOf(event) === 'milestone'
-            return (
-              <span key={i} className="absolute w-px rounded-full"
-                style={{
-                  left: position(event.t), background: css(colorOf(event, colors)),
-                  top: milestone ? '8%' : '28%', height: milestone ? '84%' : '44%', width: milestone ? 2 : 1.5,
-                  opacity: milestone ? 0.95 : 0.7,
-                }} />
-            )
+            const tone = below(event)
+            return tone && <span key={i} className={`absolute top-0 h-2.5 w-0.5 rounded-pill ${tone}`} style={{ left: position(event.t) }} />
           })}
+          {storm.map((frame, i) => frame.shrinkStart !== null && frame.shrinkStart < duration && (
+            <span key={`storm-${i}`} className="absolute top-0 h-2.5 w-0.5 rounded-pill bg-storm-ring" style={{ left: position(frame.shrinkStart) }} />
+          ))}
         </div>
         <div ref={thumb} aria-hidden className="pointer-events-none absolute inset-x-0 top-1/2 h-0 will-change-transform">
-          <div className="-mt-3 -ml-3 size-6 rounded-full border-[3px] border-ink bg-bone shadow-[0_2px_10px_rgb(0_0_0/0.5)] transition-transform duration-150 ease-out group-active:scale-110" />
+          <div className="-mt-[11px] -ml-[11px] size-[22px] rounded-full border-4 border-gold bg-bone shadow-[0_2px_10px_rgb(0_0_0/0.5)] transition-shadow duration-120 group-focus-visible:shadow-[0_0_0_6px_rgb(255_194_61/0.3)]" />
         </div>
       </div>
     </div>
   )
 })
+
+/** "7 minutes 42 seconds", for screen readers. */
+function spoken(time: number) {
+  const total = Math.floor(time)
+  const minutes = Math.floor(total / 60)
+  const seconds = total % 60
+  return [minutes && `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`, `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`].filter(Boolean).join(' ')
+}
