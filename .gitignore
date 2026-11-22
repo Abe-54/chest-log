@@ -31,3 +31,4 @@ overlay/
 
 .vercel
 .env.local
+.env*
