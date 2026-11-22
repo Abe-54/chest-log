@@ -330,18 +330,15 @@ input[type='number']:focus-visible { outline: 2px solid var(--c-gold); outline-o
 /* Footer */
 .site-footer { border-top: 1px solid var(--c-line-soft); }
 .foot { display: flex; align-items: center; justify-content: space-between; gap: 24px; width: min(100% - 2 * var(--gutter), var(--page-width) - 2 * var(--gutter)); margin-inline: auto; padding: 32px 0; }
-.foot-id { display: flex; align-items: center; gap: 24px; }
+.foot-id { display: flex; align-items: baseline; gap: 24px; }
 .foot-brand { color: var(--c-bone); font: italic 900 20px / 1 var(--font-display); text-transform: uppercase; text-decoration: none; white-space: nowrap; }
 .foot-brand:hover { color: var(--c-gold); }
-.disclaimer { margin: 0; color: var(--c-dim); font-size: 14px; line-height: 20px; }
-.foot-nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 24px; }
+.disclaimer { margin: 0; max-width: 56ch; color: var(--c-dim); font-size: 14px; line-height: 20px; }
+.foot-nav { flex: none; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 24px; max-width: 420px; }
 .foot-nav a { display: inline-flex; align-items: center; min-height: 32px; color: var(--c-mist); font: 600 14px / 1 var(--font-body); text-decoration: none; }
 .foot-nav a:hover { color: var(--c-bone); }
 
 /* Between phone and desktop: desktop structure, art stacked under the copy. */
-@media (min-width: 1024px) {
-  .disclaimer { white-space: nowrap; }
-}
 
 @media (max-width: 1023px) {
   .home-section > .faq-stamp { grid-column: 1; }

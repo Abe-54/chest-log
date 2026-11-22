@@ -75,7 +75,7 @@ export const FAQ_POOL = {
   },
   epic: {
     q: 'Is Chest Log made by Epic Games?',
-    a: `No. Chest Log is a fan project. ${SITE.disclaimer}`,
+    a: `No. ${SITE.disclaimer}`,
   },
 } as const satisfies Record<string, Faq>
 

@@ -4,7 +4,8 @@ export const SITE = {
   name: 'Chest Log',
   origin: (process.env.SITE_ORIGIN ?? 'https://fortnite-chestcounter.vercel.app').replace(/\/$/, ''),
   repo: 'https://github.com/Abe-54/chest-log',
-  disclaimer: 'Not affiliated with or endorsed by Epic Games. Fortnite is a trademark of Epic Games, Inc.',
+  /** Ends with the notice Epic's Fan Content Policy (section 1.10) requires, word for word, on every page that uses Epic material. */
+  disclaimer: 'Chest Log is an unofficial fan project. Portions of the materials used are trademarks and/or copyrighted works of Epic Games, Inc. All rights reserved by Epic. This material is not official and is not endorsed by Epic.',
   app: { home: '/app/', track: '/app/track', demo: '/app/demo' },
   demosPath: '%LOCALAPPDATA%\\FortniteGame\\Saved\\Demos',
   ogImage: { path: '/og.png', width: 1200, height: 630, alt: 'Chest Log. Every chest, every match, replayed on the map.' },

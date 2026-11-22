@@ -62,7 +62,7 @@ async function checkPage(slug: string) {
       types: ld.flatMap(block => (block['@graph'] ?? [block]).map((node: { '@type': string }) => node['@type'])),
       details: document.querySelectorAll('details.qa').length,
       analytics: !!document.querySelector(`script[src="${'/_vercel/insights/script.js'}"]`),
-      disclaimer: document.body.innerText.includes('Not affiliated with or endorsed by Epic Games.'),
+      disclaimer: document.body.innerText.includes('Portions of the materials used are trademarks and/or copyrighted works of Epic Games, Inc. All rights reserved by Epic. This material is not official and is not endorsed by Epic.'),
       updated: document.querySelector('time')?.getAttribute('datetime') ?? null,
       links: [...document.querySelectorAll('a[href]')].map(a => a.getAttribute('href') ?? ''),
       cls: (window as unknown as { __cls: number }).__cls,
@@ -80,7 +80,7 @@ async function checkPage(slug: string) {
   for (const type of need) check(facts.types.includes(type), path, `JSON-LD has no ${type}`)
   check(facts.details === spec.faq.length, path, `${facts.details} details for ${spec.faq.length} questions`)
   check(facts.analytics, path, 'analytics script tag is missing')
-  check(facts.disclaimer, path, 'Epic disclaimer is missing')
+  check(facts.disclaimer, path, "the notice Epic's Fan Content Policy requires is missing")
   check(facts.updated === spec.updated, path, `updated stamp is ${facts.updated}`)
   check(facts.cls < 0.01, path, `layout shift ${facts.cls}`)
   check(facts.overflow <= 0, path, `page overflows horizontally by ${facts.overflow}px`)
