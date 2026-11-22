@@ -4,7 +4,7 @@ Counts the chests you open in Fortnite from the game's own replay files, and rep
 
 There are two builds from one codebase.
 
-- **Hosted site.** A static site. A visitor picks their Fortnite `Demos` folder (or drops replay files), the replays are parsed in their browser by a WebAssembly build of the extractor, and the result is stored in that browser's IndexedDB. Nothing is uploaded.
+- **Hosted app.** A static app served under `/app/`. A visitor picks their Fortnite `Demos` folder (Chrome and Edge remember it and check it every 30 seconds while the tab is open) or drops a replay file, the replays are parsed in their browser by a WebAssembly build of the extractor, and the result is stored in that browser's IndexedDB. Nothing is uploaded. `/app/demo` opens the same app on a sample library with every name replaced.
 - **Local app.** Runs on the PC you play on. A small Node server watches the `Demos` folder, counts each match seconds after it ends, and also lines up your video clips with the replays.
 
 ## Layout
@@ -24,11 +24,14 @@ There are two builds from one codebase.
 ```bash
 cd web
 npm ci
-npx vite build --mode hosted        # writes web/dist-hosted
-node scripts/serve-hosted.mjs       # http://127.0.0.1:4180
+npx vite build --mode hosted        # writes web/dist-hosted/app
+node scripts/serve-hosted.mjs       # http://127.0.0.1:4180/app/
+npx tsx scripts/hosted-smoke.ts     # drives it in headless Chromium, no replays needed
 ```
 
-Vercel builds the same thing from `vercel.json`.
+Vercel builds the same thing from `vercel.json`. The app's files live in `dist-hosted/app` so they sit where their URLs say; the host sends every other `/app/` path to `/app/index.html`.
+
+The demo library in `web/public/demo` is made from the local app's own `week.json` and `matches/` by `npx tsx scripts/make-demo.ts <dir>`. The source holds real player names and stays out of the repository; the script refuses to write anything that still carries one.
 
 Rebuild the engine after changing anything under `extractor/` or `vendor/` (needs the .NET 10 SDK with the `wasm-tools` workload in `tools/dotnet`):
 
@@ -40,6 +43,7 @@ Checks:
 
 - `extractor/check/` proves the console and browser builds of the extractor produce identical output.
 - `npx tsx scripts/hosted-e2e.ts` (in `web/`) imports `replays/` through the real page in headless Chromium and compares the stored library with the local pipeline's output.
+- `DEMO_SRC=<dir> npm test` also checks the published demo against its source: none of the source's names, and byte-for-byte what the script makes.
 
 ## Local app
 

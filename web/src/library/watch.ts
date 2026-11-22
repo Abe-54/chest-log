@@ -79,9 +79,13 @@ export async function resumeWatching() {
 
 /** On page load: picks the remembered folder back up, watching it at once when the browser still allows reading it. */
 export async function restoreWatching() {
-  const folder = await rememberedFolder()
-  if (!folder) return
-  current = folder
-  if (await folder.queryPermission({ mode: 'read' }) === 'granted') startWatching(folder)
-  else pause()
+  try {
+    const folder = await rememberedFolder()
+    if (!folder) return
+    current = folder
+    if (await folder.queryPermission({ mode: 'read' }) === 'granted') startWatching(folder)
+    else pause()
+  } catch {
+    // The remembered folder is gone or the browser will not say; Auto-track offers to choose it again.
+  }
 }
