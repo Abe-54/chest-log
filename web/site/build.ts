@@ -5,6 +5,7 @@ import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { SITE } from './config.ts'
 import { FONTS, fontFaceCss, fontPath } from './fonts.ts'
+import { MAP_SOURCES, mapSource } from './map-hero.ts'
 import { PAGES, pageUrl } from './pages.ts'
 import { renderNotFound, renderPage, renderRobots, renderSitemap, type Assets } from './template.ts'
 import { validateOutput, validateRegistry } from './validate.ts'
@@ -36,7 +37,11 @@ async function buildAssets(): Promise<Assets> {
   const source = await readFile(join(here, 'site.css'), 'utf8')
   const css = await publishAsset('site', 'css', minify(`${fontFaceCss(face => urls.get(face.file)!)}\n${source}`))
   const toc = await publishAsset('toc', 'js', await readFile(join(here, 'toc.js'), 'utf8'))
-  return { css, preload: FONTS.filter(face => face.preload).map(face => urls.get(face.file)!), toc }
+  const map = {
+    small: await publishAsset('island-1024', 'webp', await readFile(mapSource(MAP_SOURCES.small))),
+    large: await publishAsset('island-2048', 'webp', await readFile(mapSource(MAP_SOURCES.large))),
+  }
+  return { css, preload: FONTS.filter(face => face.preload).map(face => urls.get(face.file)!), toc, map }
 }
 
 async function writePage(slug: string, html: string) {

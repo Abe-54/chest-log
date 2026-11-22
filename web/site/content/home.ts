@@ -15,7 +15,7 @@ export const ladderPercent = (chance: number) => {
 
 const LADDER = [
   { chests: 1_000, label: `${calc.formatCount(1_000)} chests` },
-  { chests: DEMO.chests, label: `${calc.formatCount(DEMO.chests)} · demo squad`, demo: true },
+  { chests: DEMO.chests, label: `${calc.formatCount(DEMO.chests)}, demo squad`, demo: true },
   { chests: 10_000, label: `${calc.formatCount(10_000)} chests` },
   { chests: 50_000, label: `${calc.formatCount(50_000)} chests`, wideOnly: true },
   { chests: coinFlip, label: `${calc.formatCount(coinFlip)} chests` },
@@ -27,8 +27,8 @@ const ladder = `<div class="ladder"><ol>${LADDER.map(row => {
   return `<li${classes ? ` class="${classes}"` : ''}><span class="l">${row.label}</span><span class="track" aria-hidden="true"><span class="fill" style="--w:${(chance * 100).toFixed(2)}%"></span></span><span class="v">${ladderPercent(chance)}</span></li>`
 }).join('')}</ol><p class="ladder-note">Odds that at least one token dropped: 1 &minus; (1 &minus; 1/${calc.formatCount(psa.oneIn)})^chests. A coin flip takes ${calc.formatCount(coinFlip)} chests.</p></div>`
 
-const lootSteps = (items: { title: string; body: string }[]) =>
-  `<ol class="loot-steps">${items.map((item, at) => `<li class="rarity-wash"><span class="step-n" aria-hidden="true">0${at + 1}</span><h3>${item.title}</h3><p>${item.body}</p></li>`).join('')}</ol>`
+const steps = (items: { title: string; body: string }[]) =>
+  `<ol class="home-steps">${items.map(item => `<li><h3>${item.title}</h3><p>${item.body}</p></li>`).join('')}</ol>`
 
 export const home: Page = {
   slug: '',
@@ -36,13 +36,12 @@ export const home: Page = {
   label: 'Home',
   title: 'Fortnite Chest Counter: Count Chests From Your Replays',
   description: 'Free Fortnite chest counter. Count every chest from your replay files, replay each match on the map and see your Pirate token odds. Nothing is uploaded.',
-  h1: 'Every chest, every match, replayed on the map.',
+  h1: 'Count every Fortnite chest from your replays',
   hero: {
-    eyebrow: 'Free · runs in your browser',
-    accent: 'replayed on the map.',
+    promise: 'Free, in your browser, and nothing is uploaded.',
     note: 'Replays live on your PC. Open this page there to count them, or try the demo here.',
   },
-  lede: `<p><strong>No download. Nothing uploaded.</strong> Drop in your Fortnite replays and get your own Pirate Shop token odds.</p>`,
+  lede: `<p>Fortnite already saves a replay of every match. Chest Log reads them, counts the chests your squad opened, and plays each match back on the island.</p>`,
   ctas: [
     { label: 'Count my chests', href: SITE.app.track, kind: 'primary' },
     { label: 'Try the demo', href: SITE.app.demo, kind: 'secondary' },
@@ -55,28 +54,26 @@ export const home: Page = {
       id: 'how-it-works',
       heading: 'How it works',
       aside: `<p>With replays turned on, Fortnite records every match. Chest Log reads those replays inside your browser tab.</p>`,
-      html: lootSteps([
+      html: steps([
         { title: 'Pick your Demos folder', body: `It lives at <code>${esc(SITE.demosPath)}</code>. Or drop in a single .replay file.` },
-        { title: 'Your browser reads them', body: 'Every chest you or your squad opened or broke gets counted. The files never leave your computer.' },
-        { title: 'Count, compare, replay', body: 'See your week, your token odds, and every match played back on the island with each chest pinned.' },
+        { title: 'Your browser reads the replays', body: 'Every chest you or your squad opened or broke gets counted. The files never leave your computer.' },
+        { title: 'Watch any match back', body: 'Your week, your token odds, and every match on the island with each chest pinned where you opened it.' },
       ]),
     },
     {
       id: 'token-odds',
-      eyebrow: 'Pirate Shop token odds',
-      heading: 'Did your squad find a token yet?',
+      heading: 'Did your squad find a Pirate Shop token yet?',
       html: `<div class="panel-copy"><p>Epic puts the drop at 1 in ${calc.formatCount(psa.oneIn)} per chest. When anyone in your squad finds a treasure in a chest, the whole squad gets it, so every chest your squad opens is a roll for you. Chest Log adds up your squad's real chest count and turns it into your odds that at least one dropped.</p><p class="cta-row"><a class="btn btn-inline" href="/treasure-hunters-odds/">Get my odds</a></p>${cite('epic-drop-rates')}</div>${ladder}`,
     },
     {
       id: 'what-you-get',
       heading: 'What you get',
-      html: `<p>Chest Log is a free Fortnite chest counter for PC. Point it at the replay files Fortnite saves and it counts the chests you opened in every match. ${link('/fortnite-replay-files/', 'Where the files are')}.</p><ul class="features">
-<li><strong>A chest count for every match.</strong> See what each match gave you, not only a running total.</li>
-<li><strong>Every match on the map.</strong> Watch each match back on the island map.</li>
-<li><strong>Your Pirate token odds.</strong> Your squad's chest count run through Epic's published per-chest odds. ${link('/treasure-hunters-odds/', 'See the odds and the calculator')}.</li>
-<li><strong>Auto tracking.</strong> In Chrome or Edge, Chest Log rechecks your replay folder every 30 seconds while the tab is open. ${link('/auto-track/', 'How auto tracking works')}.</li>
-<li><strong>Nothing leaves your computer.</strong> Replays are read in your browser. There is no account. ${link('/privacy/', 'Read the privacy details')}.</li>
-</ul>`,
+      html: `<p>Chest Log is a free Fortnite chest counter for PC. Point it at the replay files Fortnite saves and it counts the chests you opened in every match. ${link('/fortnite-replay-files/', 'Where the files are')}.</p><dl class="features">
+<div><dt>A count for every match</dt><dd>See what each match gave you, not only a running total.</dd></div>
+<div><dt>Your Pirate token odds</dt><dd>Your squad's chest count run through Epic's published per-chest odds. ${link('/treasure-hunters-odds/', 'See the odds and the calculator')}.</dd></div>
+<div><dt>Auto tracking</dt><dd>In Chrome or Edge, Chest Log rechecks your replay folder every 30 seconds while the tab is open. ${link('/auto-track/', 'How auto tracking works')}.</dd></div>
+<div><dt>Nothing leaves your computer</dt><dd>Replays are read in your browser. There is no account. ${link('/privacy/', 'Read the privacy details')}.</dd></div>
+</dl>`,
     },
     {
       id: 'manual-vs-replay',
