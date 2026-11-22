@@ -178,7 +178,7 @@ function RecentGame({ match }: { match: MatchRow }) {
 }
 
 function Panel({ children }: { children: ReactNode }) {
-  return <div className="rounded-panel border border-line bg-ink-2 p-5 md:p-7">{children}</div>
+  return <div className="min-w-0 rounded-panel border border-line bg-ink-2 p-5 md:p-7">{children}</div>
 }
 
 function Heading({ title, note, id }: { title: string; note?: string; id?: string }) {

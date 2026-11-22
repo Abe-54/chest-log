@@ -331,7 +331,8 @@ function useReplayKeys(store: PlaybackStore, duration: number, commit: (time: nu
     }
     const keydown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement
-      if (target.closest('input, select, textarea, [role="slider"]')) return
+      // A focused widget that already handled the key (the speed switch, a slider) keeps it.
+      if (event.defaultPrevented || target.closest('input, select, textarea, [role="slider"]')) return
       const onControl = !!target.closest('button, a')
       if (event.code === 'Space' && !onControl) { event.preventDefault(); togglePlay(store, duration) }
       else if (event.key === 'ArrowLeft') { event.preventDefault(); step(event.shiftKey ? -30 : -5) }
