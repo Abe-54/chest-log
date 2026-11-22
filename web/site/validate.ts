@@ -80,7 +80,8 @@ export async function validateOutput(outDir: string, pages: readonly Page[]): Pr
       }
     }
     const scripts = (html.match(/<script(?![^>]*(?:ld\+json|application\/json|src=))[^>]*>/g) ?? []).length
-    const allowed = 1 + (page.script ? 1 : 0)
+    // Every page: the js class in the head, the menu closer and the analytics queue. The home page adds the hero map.
+    const allowed = 3 + (page.type === 'home' ? 1 : 0) + (page.script ? 1 : 0)
     if (scripts !== allowed) errors.push(`${at}: found ${scripts} inline scripts, expected ${allowed}.`)
     if (!html.includes(SITE.disclaimer)) errors.push(`${at}: the disclaimer is missing from the footer.`)
     if (page.faq.length > 0 && (html.match(/<details class="qa"/g) ?? []).length !== page.faq.length) errors.push(`${at}: FAQ count differs from the details elements.`)

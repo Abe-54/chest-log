@@ -1,7 +1,7 @@
 import { SITE } from './config.ts'
 import { esc, longDate, plainText, shortDate } from './html.ts'
 import { structuredData } from './jsonld.ts'
-import { mapHero } from './map-hero.ts'
+import { mapHero, mapHeroScript } from './map-hero.ts'
 import { PAGES, pageBySlug, pageUrl, type Cta, type Page } from './pages.ts'
 
 export type Assets = { css: string; preload: string[]; toc: string; map: { small: string; large: string } }
@@ -14,7 +14,10 @@ const THEME_COLOR = '#0d4f94'
 
 export const logoMark = `<svg class="logo-mark" viewBox="-8 -8 52 52" aria-hidden="true" focusable="false"><rect class="lm-outer" width="36" height="36" rx="8" transform="rotate(45 18 18)"/><rect class="lm-inner" x="12" y="12" width="12" height="12" rx="2" transform="rotate(45 18 18)"/></svg>`
 
-const hamburger = `<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>`
+const hamburger = `<svg class="menu-icon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path class="menu-open" d="M3 6h18M3 12h18M3 18h18"/><path class="menu-close" d="M5 5l14 14M19 5L5 19"/></svg>`
+
+/** The menu is a details element; this closes it on Escape or a click outside, as a dropdown should. */
+const menuScript = `<script>(function(){function shut(m,focus){m.removeAttribute('open');if(focus)m.querySelector('summary').focus()}document.addEventListener('click',function(e){var m=document.querySelector('details.menu[open]');if(m&&!m.contains(e.target))shut(m,false)});document.addEventListener('keydown',function(e){var m=document.querySelector('details.menu[open]');if(m&&e.key==='Escape')shut(m,true)})})()</script>`
 
 const NAV = [
   { href: '/#how-it-works', text: 'How it works' },
@@ -43,6 +46,7 @@ const head = (page: Page, assets: Assets) => {
   const article = page.type === 'guide'
   return `<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>document.documentElement.classList.add('js')</script>
 <title>${esc(page.title)}</title>
 <meta name="description" content="${esc(page.description)}">
 <link rel="canonical" href="${url}">
@@ -76,7 +80,7 @@ const header = () => `<a class="skip" href="#main">Skip to content</a>
 <header class="site-header"><div class="bar">
 <a class="brand" href="/">${logoMark}<span>${SITE.name}</span></a>
 <nav class="main-nav" aria-label="Main">${NAV.map(item => `<a href="${item.href}">${item.text}</a>`).join('')}</nav>
-<a class="btn-nav" href="${SITE.app.track}"><span class="wide-only">Count my chests</span><span class="narrow-only">Count</span></a>
+<a class="btn-nav on-pc" href="${SITE.app.track}">Count my chests</a><a class="btn-nav on-touch" href="${SITE.app.demo}">Try the demo</a>
 <details class="menu"><summary aria-label="Menu">${hamburger}</summary><nav class="menu-panel" aria-label="All pages">${[
   ...NAV.map(item => `<a href="${item.href}">${item.text}</a>`),
   ...FOOTER.filter(item => !NAV.some(nav => nav.href === pageUrl(item.slug))).map(item => `<a href="${pageUrl(item.slug)}">${item.text}</a>`),
@@ -104,22 +108,22 @@ const homeSection = (section: Page['sections'][number]) => {
   return `<section class="home-section" id="${section.id}" aria-labelledby="${section.id}-h"><div class="wrap">${head}${section.html}</div></section>`
 }
 
-const renderHome = (page: Page, assets: Assets) => {
-  const ctas = page.ctas ?? []
-  return `<main id="main">
+/** PC visitors get the counter first. Phones and tablets cannot reach a replay folder, so the demo leads there. */
+const homeCtas = (extra = '') => `<p class="cta-row on-pc">${button({ label: 'Count my chests', href: SITE.app.track, kind: 'primary' })}${button({ label: 'Try the demo', href: SITE.app.demo, kind: 'secondary' }, extra)}</p><p class="cta-row on-touch">${button({ label: 'Try the demo', href: SITE.app.demo, kind: 'primary' })}${button({ label: 'Count my chests on PC', href: SITE.app.track, kind: 'secondary' }, extra)}</p>`
+
+const renderHome = (page: Page, assets: Assets) => `<main id="main">
 <section class="hero">
 <div class="hero-copy">
 <h1>${esc(page.h1)}</h1>
 <div class="dek">${page.lede}</div>
-<p class="cta-row">${ctas.map(cta => button(cta)).join('')}</p>
-${page.hero ? `<p class="hero-promise">${esc(page.hero.promise)}</p><p class="hero-note">${esc(page.hero.note)}</p>` : ''}</div>
+${homeCtas()}
+${page.hero ? `<p class="hero-promise on-pc">${esc(page.hero.promise)}</p><p class="hero-note on-touch">${esc(page.hero.note)}</p>` : ''}</div>
 ${mapHero(assets.map)}
 </section>
 ${page.sections.map(homeSection).join('\n')}
-<section class="home-section faq-home" id="faq-list" aria-labelledby="faq-h"><div class="wrap"><h2 id="faq-h">${faqHeading(page)}</h2>${faqItems(page)}<p class="faq-stamp">Answers updated <time datetime="${page.updated}">${longDate(page.updated)}</time></p></div></section>
-<section class="final-cta" aria-labelledby="cta-h"><div class="wrap"><h2 id="cta-h">How many chests did your squad open this week?</h2><p class="cta-row">${ctas.map(cta => button(cta, cta.kind === 'secondary' ? ' cta-btn-secondary' : '')).join('')}</p></div></section>
+<section class="home-section faq-home" id="faq-list" aria-labelledby="faq-h"><div class="wrap"><h2 id="faq-h">${faqHeading(page)}</h2>${faqItems(page)}<p class="faq-stamp">Answers updated <time datetime="${page.updated}">${longDate(page.updated)}</time>. <a href="/faq/">All questions</a></p></div></section>
+<section class="final-cta" aria-labelledby="cta-h"><div class="wrap"><h2 id="cta-h">How many chests did your squad open this week?</h2>${homeCtas(' cta-btn-secondary')}</div></section>
 </main>`
-}
 
 /* Articles */
 
@@ -169,15 +173,20 @@ const related = (page: Page) =>
         })
         .join('')}</ul></section>`
 
-const renderArticle = (page: Page) => `<main id="main">
+/** A contents list earns its column only when there are at least three places to jump to. */
+const MIN_TOC = 3
+
+const renderArticle = (page: Page) => {
+  const toc = tocEntries(page).length >= MIN_TOC
+  return `<main id="main"${toc ? '' : ' class="no-toc"'}>
 <header class="art-head"><div class="art-head-in">
 ${crumbs(page)}<h1>${esc(page.h1)}</h1>
 <div class="lede">${page.lede}</div>
-<p class="meta">Updated <time datetime="${page.updated}">${shortDate(page.updated)}</time> · ${readMinutes(page)} min read</p>
+<p class="meta"><span>Updated <time datetime="${page.updated}">${shortDate(page.updated)}</time></span><span>${readMinutes(page)} min read</span></p>
 </div></header>
-${tocBar(page)}
+${toc ? tocBar(page) : ''}
 <div class="art-body">
-${tocNav(page)}
+${toc ? tocNav(page) : ''}
 <div class="prose">
 ${page.sections.map(section => `<section id="${section.id}" aria-labelledby="${section.id}-h"><h2 id="${section.id}-h">${esc(section.heading)}</h2>${section.html}</section>`).join('\n')}
 ${page.faq.length === 0 ? '' : `<section id="faq-list" aria-labelledby="faq-h"><h2 id="faq-h">${faqHeading(page)}</h2>${faqItems(page)}</section>`}
@@ -186,6 +195,7 @@ ${related(page)}
 </div>
 </div>
 </main>`
+}
 
 export const renderPage = (page: Page, assets: Assets) => {
   const home = page.type === 'home'
@@ -197,7 +207,8 @@ ${head(page, assets)}
 <body class="${home ? 'page-home' : 'page-article'}">
 ${header()}
 ${home ? renderHome(page, assets) : renderArticle(page)}
-${footer()}${home ? '' : `\n<script defer src="${assets.toc}"></script>`}${page.script ? `\n<script>${page.script}</script>` : ''}
+${footer()}
+${menuScript}${home ? `\n<script>${mapHeroScript}</script>` : `\n<script defer src="${assets.toc}"></script>`}${page.script ? `\n<script>${page.script}</script>` : ''}
 ${analytics}
 </body>
 </html>

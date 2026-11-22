@@ -27,7 +27,8 @@ body { display: block; width: ${SITE.ogImage.width}px; height: ${SITE.ogImage.he
 .og .host { color: var(--c-mist); font: 600 22px / 1 var(--font-body); }
 .og h1 { position: relative; z-index: 1; max-width: 560px; margin-top: 64px; font-size: 92px; line-height: 0.92; }
 .og .og-foot { position: absolute; z-index: 1; left: 64px; bottom: 48px; margin: 0; color: var(--c-prose); font: 500 25px / 1.3 var(--font-body); max-width: 520px; }
-.og .hero-map { top: 50%; right: -120px; width: 760px; translate: 0 -50%; }
+.og .hero-visual { top: 50%; right: -120px; width: 760px; translate: 0 -50%; }
+.og .map-count { display: none; }
 .og .hero-map *, .og .hero-map *::before { animation: none !important; }
 </style>
 <div class="og"><div class="top"><span class="brand">${logoMark}<span>${SITE.name}</span></span><span class="host">${host}</span></div>

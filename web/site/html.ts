@@ -38,15 +38,16 @@ export const cite = (...ids: SourceId[]) => {
   return `<p class="source">Source${ids.length > 1 ? 's' : ''}. ${items.join('; ')}.</p>`
 }
 
-type TableSpec = { caption: string; head: string[]; rows: string[][]; numeric?: number[]; bodyId?: string }
+type TableSpec = { caption: string; head: string[]; rows: string[][]; numeric?: number[]; bodyId?: string; stack?: boolean }
 
-export const table = ({ caption, head, rows, numeric = [], bodyId }: TableSpec) => {
+/** `stack` lets the table fold into one block per row on phones, each cell labelled with its column heading. */
+export const table = ({ caption, head, rows, numeric = [], bodyId, stack = false }: TableSpec) => {
   const cell = (tag: 'th' | 'td', value: string, at: number) =>
-    `<${tag}${numeric.includes(at) ? ' class="num"' : ''}${tag === 'th' ? ' scope="col"' : ''}>${value}</${tag}>`
+    `<${tag}${numeric.includes(at) ? ' class="num"' : ''}${tag === 'th' ? ' scope="col"' : ''}${stack && tag === 'td' ? ` data-label="${esc(plainText(head[at]))}"` : ''}>${value}</${tag}>`
   const body = rows
     .map(row => `<tr>${row.map((value, at) => (at === 0 ? `<th scope="row">${value}</th>` : cell('td', value, at))).join('')}</tr>`)
     .join('')
-  return `<div class="table-wrap" role="region" aria-label="${esc(caption)}" tabindex="0"><table><caption>${esc(caption)}</caption><thead><tr>${head.map((value, at) => cell('th', value, at)).join('')}</tr></thead><tbody${bodyId ? ` id="${bodyId}" aria-live="polite"` : ''}>${body}</tbody></table></div>`
+  return `<div class="table-wrap${stack ? ' table-stack' : ''}" role="region" aria-label="${esc(caption)}" tabindex="0"><table><caption>${esc(caption)}</caption><thead><tr>${head.map((value, at) => cell('th', value, at)).join('')}</tr></thead><tbody${bodyId ? ` id="${bodyId}" aria-live="polite"` : ''}>${body}</tbody></table></div>`
 }
 
 export const steps = (items: { title: string; body: string }[]) =>
