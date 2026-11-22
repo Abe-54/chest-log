@@ -52,28 +52,28 @@ function MatchesPage() {
   const byDay = key === 'startUtc'
 
   return (
-    <main className="mx-auto max-w-4xl px-4 pt-8">
-      <h1 className="display text-5xl sm:text-6xl">Matches</h1>
-      <p className="mt-2 text-mist">{week.realMatches} full matches and {week.stubs} partial recording. Pick one to replay it on the map.</p>
-      <div className="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]" role="group" aria-label="Sort matches">
+    <main className="page pt-8 md:pt-14">
+      <h1 className="display text-[44px] md:text-display-lg">Matches</h1>
+      <p className="mt-3 text-[15px] text-mist md:text-[17px]">{week.realMatches} full matches and {week.stubs} partial recording. Pick one to replay it on the map.</p>
+      <div className="no-scrollbar -mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:px-0" role="group" aria-label="Sort matches">
         {sortKeys.map(option => {
           const active = option === key
           const Arrow = ascending ? ArrowUp : ArrowDown
           return (
             <button key={option} type="button" aria-pressed={active} onClick={() => choose(option)}
-              className="press flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-line px-3.5 text-sm text-mist aria-pressed:border-transparent aria-pressed:bg-bone aria-pressed:text-ink">
+              className="press flex h-[34px] shrink-0 items-center gap-1.5 rounded-pill border border-line px-3.5 text-sm font-semibold text-mist-2 aria-pressed:border-line-strong aria-pressed:bg-ink-3 aria-pressed:font-bold aria-pressed:text-bone">
               {labels[option]}{active && <Arrow className="size-3.5" />}
             </button>
           )
         })}
       </div>
-      <ol className="mt-4">
+      <ol className="mt-4 max-w-4xl">
         {rows.map((match, i) => {
           const day = shortDate(match.startUtc)
           const newDay = byDay && (i === 0 || shortDate(rows[i - 1].startUtc) !== day)
           return (
             <li key={match.id}>
-              {newDay && <h2 className="sticky top-14 z-10 -mx-4 bg-ink/95 px-4 pt-5 pb-2 text-xs font-semibold tracking-wider text-dim uppercase backdrop-blur">{day}</h2>}
+              {newDay && <h2 className="caps sticky top-14 z-10 -mx-4 border-b border-line-soft bg-ink-glass px-4 pt-5 pb-2 text-dim backdrop-blur md:top-20">{day}</h2>}
               <MatchListRow match={match} day={day} byDay={byDay} />
             </li>
           )
@@ -87,11 +87,11 @@ function MatchListRow({ match, day, byDay }: { match: MatchRow; day: string; byD
   const mates = match.squad.filter(member => !member.you)
   return (
     <Link to="/matches/$matchId" params={{ matchId: match.id }}
-      className="press -mx-2 flex items-center gap-4 rounded-xl px-2 py-3 hover:bg-ink-2">
+      className="press -mx-2 flex items-center gap-4 rounded-card px-2 py-3 hover:bg-ink-2">
       <span className={cn('display num w-14 shrink-0 text-right text-4xl', match.stub ? 'text-dim' : 'text-gold')}>{match.chests}</span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-semibold">{match.stub ? 'Partial recording' : match.zone ?? 'Unknown drop'}</span>
-        <span className="num block truncate text-sm text-mist">
+        <span className="block truncate text-base font-bold">{match.stub ? 'Partial recording' : match.zone ?? 'Unknown drop'}</span>
+        <span className="num block truncate text-sm text-mist-2">
           {byDay ? timeOfDay(match.startUtc) : `${day}, ${timeOfDay(match.startUtc)}`}
           {match.firstChest !== null && ` · first chest ${clock(match.firstChest)}`}
         </span>
@@ -103,7 +103,7 @@ function MatchListRow({ match, day, byDay }: { match: MatchRow; day: string; byD
       </span>
       {match.clips > 0 && <Clapperboard aria-label={`${match.clips} clips`} className="size-4 shrink-0 text-kelp" />}
       <span className="num w-20 shrink-0 text-right text-sm">
-        <span className={cn('block font-semibold', match.placement === 1 && 'text-gold')}>{placeLabel(match.placement)}</span>
+        <span className={cn('block font-bold', match.placement === 1 && 'text-gold')}>{placeLabel(match.placement)}</span>
         <span className="block text-mist">{plural(match.kills ?? 0, "kill")}</span>
       </span>
     </Link>
