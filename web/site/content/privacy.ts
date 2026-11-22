@@ -20,6 +20,11 @@ export const privacy: Page = {
       html: `<p>When you pick your replay folder or files, your browser reads them with a WebAssembly program that Chest Log serves with the page. The reading happens on your computer.</p><p>The results are your match list and your chest counts. They are saved in IndexedDB, which is storage built into your browser and tied to this site. They are not sent anywhere.</p>`,
     },
     {
+      id: 'companion',
+      heading: 'The companion app',
+      html: `<p>If you install the ${link('/companion/', 'Chest Log Companion')}, it lists the replay files in your Demos folder and hands them to the Chest Log page in your browser, over an address that never leaves your PC. Your browser then reads them as above. The companion sends nothing anywhere else.</p>`,
+    },
+    {
       id: 'names',
       heading: 'What a replay file contains',
       html: `<p>A replay records a whole match, including the names of the other players. The match data Chest Log stores in your browser can include those names. It stays in your browser. Chest Log reads your replay files without changing them.</p>`,
@@ -46,5 +51,5 @@ export const privacy: Page = {
     },
   ],
   faq: [],
-  related: ['fortnite-replay-files', 'treasure-hunters-odds', 'faq'],
+  related: ['companion', 'fortnite-replay-files', 'faq'],
 }

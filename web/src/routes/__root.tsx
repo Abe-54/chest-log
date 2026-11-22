@@ -4,7 +4,9 @@ import { Toaster } from 'sonner'
 import { isMissing, weekQuery } from '~/lib/queries'
 import { base, demo, hosted } from '~/lib/mode'
 import { cn } from '~/lib/cn'
-import { LiveDot } from '~/components/live'
+import { LiveDot, StatusPill } from '~/components/live'
+import { useSelector } from '@tanstack/react-store'
+import { companionStore } from '~/library/companion'
 import { DISCLAIMER, TabGlyph, Wordmark, type Glyph } from '~/components/brand'
 
 interface Tab { to: '/' | '/matches' | '/track' | '/clips'; label: string; glyph: Glyph; exact: boolean }
@@ -94,8 +96,10 @@ function Shell() {
   )
 }
 
-/** Browsers cannot watch the Demos folder, so after a session the header offers the one click that adds new matches. */
+/** With the companion connected, new matches arrive on their own; without it, the header offers the click that adds them. */
 function AddButton() {
+  const companion = useSelector(companionStore, state => state)
+  if (companion.phase === 'connected') return <StatusPill phase="watching" word="Companion on" detail={`${companion.replays} replays in your folder`} to="/track" />
   return (
     <Link to="/track" className="press display flex h-9 items-center rounded-button border-2 border-gold px-3 text-lg text-gold hover:bg-gold hover:text-ink md:h-11 md:px-4 md:text-xl">
       Add<span className="max-md:hidden">&nbsp;new matches</span>

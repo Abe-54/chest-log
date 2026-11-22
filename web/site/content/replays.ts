@@ -47,7 +47,7 @@ export const replays: Page = {
         { title: 'Open Chest Log', body: `On your PC, choose ${link(SITE.app.track, 'Count my chests')} and pick your replay folder.` },
         { title: 'Open the Demos folder', body: `In the window that opens, paste ${pathCode(SITE.demosPath)} into the address bar, press Enter, then select the folder.` },
         { title: 'Wait for the import', body: 'Chest Log takes about two seconds for each replay file. Keep the tab open while it works.' },
-      ])}<p>After you play, choose the folder again. Chest Log skips the matches it already counted.</p>`,
+      ])}<p>After you play, choose the folder again. Chest Log skips the matches it already counted. To have new matches counted as they end, use the ${link('/companion/', 'companion app')}.</p>`,
     },
     {
       id: 'contents',
@@ -64,5 +64,5 @@ export const replays: Page = {
       a: `Epic says PC can keep an unlimited number of saved replays and that replays from an older game version stop being valid after an update unless you saved them. We could not find a limit for unsaved replays.`,
     },
   ],
-  related: ['treasure-hunters-odds', 'privacy', 'faq'],
+  related: ['companion', 'treasure-hunters-odds', 'privacy', 'faq'],
 }
