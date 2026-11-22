@@ -108,8 +108,20 @@ const homeSection = (section: Page['sections'][number]) => {
   return `<section class="home-section" id="${section.id}" aria-labelledby="${section.id}-h"><div class="wrap">${head}${section.html}</div></section>`
 }
 
-/** PC visitors get the counter first. Phones and tablets cannot reach a replay folder, so the demo leads there. */
-const homeCtas = (extra = '') => `<p class="cta-row on-pc">${button({ label: 'Count my chests', href: SITE.app.track, kind: 'primary' })}${button({ label: 'Try the demo', href: SITE.app.demo, kind: 'secondary' }, extra)}</p><p class="cta-row on-touch">${button({ label: 'Try the demo', href: SITE.app.demo, kind: 'primary' })}${button({ label: 'Count my chests on PC', href: SITE.app.track, kind: 'secondary' }, extra)}</p>`
+/**
+ * PC visitors get the counter first. Phones and tablets cannot reach a replay folder, so the demo leads there,
+ * and the second action hands the page to their PC instead of opening an app that cannot run on the phone.
+ */
+const homeCtas = (extra = '') => `<p class="cta-row on-pc">${button({ label: 'Count my chests', href: SITE.app.track, kind: 'primary' })}${button({ label: 'Try the demo', href: SITE.app.demo, kind: 'secondary' }, extra)}</p><p class="cta-row on-touch">${button({ label: 'Try the demo', href: SITE.app.demo, kind: 'primary' })}<button type="button" class="btn btn-ghost${extra}" data-send-to-pc>Send this to my PC</button></p>`
+
+/** Shares the page link on phones (or copies it), and keeps the header button out of the way while the hero's own buttons are on screen. */
+const homeScript = `(function(){var url=location.origin+'/';var toast=document.querySelector('[data-toast]');
+function say(text){toast.textContent=text;toast.classList.add('is-on');clearTimeout(say.t);say.t=setTimeout(function(){toast.classList.remove('is-on')},2600)}
+document.querySelectorAll('[data-send-to-pc]').forEach(function(b){b.addEventListener('click',function(){var data={title:'Chest Log',text:'Count my Fortnite chests on PC',url:url};
+if(navigator.share){navigator.share(data).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){say('Link copied. Open it on your PC.')},function(){say(url)})}else{say(url)}})});
+if(!('IntersectionObserver' in window))return;
+var rows=document.querySelectorAll('.hero-copy .cta-row');new IntersectionObserver(function(es){var on=es.some(function(e){return e.isIntersecting});document.body.classList.toggle('hero-cta-on',on)}).observe(rows[0]);
+rows[1]&&new IntersectionObserver(function(es){if(es[0].isIntersecting)document.body.classList.add('hero-cta-on')}).observe(rows[1])})()`
 
 const renderHome = (page: Page, assets: Assets) => `<main id="main">
 <section class="hero">
@@ -122,8 +134,9 @@ ${mapHero(assets.map)}
 </section>
 ${page.sections.map(homeSection).join('\n')}
 <section class="home-section faq-home" id="faq-list" aria-labelledby="faq-h"><div class="wrap"><h2 id="faq-h">${faqHeading(page)}</h2>${faqItems(page)}<p class="faq-stamp">Answers updated <time datetime="${page.updated}">${longDate(page.updated)}</time>. <a href="/faq/">All questions</a></p></div></section>
-<section class="final-cta" aria-labelledby="cta-h"><div class="wrap"><h2 id="cta-h">How many chests did your squad open this week?</h2>${homeCtas(' cta-btn-secondary')}</div></section>
-</main>`
+<section class="final-cta" aria-labelledby="cta-h"><div class="final-map" aria-hidden="true" style="background-image:url(${assets.map.small})"></div><div class="wrap"><h2 id="cta-h"><span class="on-pc">How many chests did your squad open this week?</span><span class="on-touch">See a real squad's week in the demo</span></h2>${homeCtas(' cta-btn-secondary')}</div></section>
+</main>
+<p class="toast" data-toast role="status" aria-live="polite"></p>`
 
 /* Articles */
 
@@ -208,7 +221,7 @@ ${head(page, assets)}
 ${header()}
 ${home ? renderHome(page, assets) : renderArticle(page)}
 ${footer()}
-${menuScript}${home ? `\n<script>${mapHeroScript}</script>` : `\n<script defer src="${assets.toc}"></script>`}${page.script ? `\n<script>${page.script}</script>` : ''}
+${menuScript}${home ? `\n<script>${mapHeroScript}</script>\n<script>${homeScript}</script>` : `\n<script defer src="${assets.toc}"></script>`}${page.script ? `\n<script>${page.script}</script>` : ''}
 ${analytics}
 </body>
 </html>

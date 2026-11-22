@@ -1,7 +1,7 @@
 import { SITE } from '../config.ts'
 import type { Page } from '../types.ts'
 import { DEMO, calc, treasure } from '../odds.ts'
-import { cite, esc, link, table } from '../html.ts'
+import { cite, link, table } from '../html.ts'
 import { pick } from './faq-pool.ts'
 
 const psa = treasure('pirate-shop-access')
@@ -41,7 +41,7 @@ export const home: Page = {
     promise: 'Free for Windows PC. Runs in your browser, and nothing is uploaded.',
     note: 'Counting needs the replay files on your Windows PC. Open this page there, or try the demo here.',
   },
-  lede: `<p>Fortnite already saves a replay of every match. Chest Log reads them, counts the chests your squad opened, and plays each match back on the island.</p>`,
+  lede: `<p>With replays turned on, Fortnite saves every match. Chest Log reads them, counts the chests your squad opened, and plays each match back on the island.</p>`,
   ctas: [
     { label: 'Count my chests', href: SITE.app.track, kind: 'primary' },
     { label: 'Try the demo', href: SITE.app.demo, kind: 'secondary' },
@@ -55,7 +55,7 @@ export const home: Page = {
       heading: 'How it works',
       aside: `<p>Chest Log is a free Fortnite chest counter for Windows PC. With replays turned on, Fortnite saves a file for every match, and Chest Log reads those files inside your browser tab. ${link('/fortnite-replay-files/', 'Where the files are')}.</p>`,
       html: steps([
-        { title: 'Pick your Demos folder', body: `It lives at <code>${esc(SITE.demosPath)}</code>. Or drop in a single .replay file.` },
+        { title: 'Pick your Fortnite replay folder', body: 'Chest Log shows you the exact path. Or drop in a single .replay file.' },
         { title: 'Your browser reads the replays', body: 'Every chest you or your squad opened or broke gets counted, match by match.' },
         { title: 'Watch any match back', body: 'Your week, your token odds, and every match on the island with each chest pinned where you opened it.' },
       ]),
@@ -63,23 +63,21 @@ export const home: Page = {
     {
       id: 'token-odds',
       heading: 'Did your squad find a Pirate Shop token yet?',
-      html: `<div class="panel-copy"><p>Epic puts the drop at 1 in ${calc.formatCount(psa.oneIn)} per chest. Treasure any squadmate finds goes to the whole squad, so every chest your squad opens is a roll for you. Chest Log turns your squad's real chest count into your odds that at least one dropped.</p><p class="cta-row"><a class="btn btn-inline btn-ink" href="/treasure-hunters-odds/">Get my odds</a></p>${cite('epic-drop-rates')}</div><div class="odds-side"><p class="odds-figure"><strong>${ladderPercent(calc.chanceAtLeastOne(psa.oneIn, 1, DEMO.chests, 0))}</strong><span>chance the demo squad found one in ${calc.formatCount(DEMO.chests)} chests</span></p>${ladder}</div>`,
+      html: `<div class="panel-copy"><p>Epic puts the drop at 1 in ${calc.formatCount(psa.oneIn)} per chest, and any squadmate's find goes to the whole squad. So every chest your squad opens is a roll for you, and Chest Log turns your squad's real count into your odds.</p><p class="cta-row"><a class="btn btn-inline btn-ink" href="/treasure-hunters-odds/">Get my odds</a></p>${cite('epic-drop-rates')}</div><div class="odds-side"><p class="odds-figure"><strong>${ladderPercent(calc.chanceAtLeastOne(psa.oneIn, 1, DEMO.chests, 0))}</strong><span>chance the demo squad found one in ${calc.formatCount(DEMO.chests)} chests</span></p>${ladder}</div>`,
     },
     {
       id: 'manual-vs-replay',
-      heading: 'Manual counters and replay counting',
+      heading: 'Why count from replays instead of by hand',
       html: `<p>A manual counter only knows what you told it. A replay is the game's own record of the match, so counting from replays does not depend on your memory.</p>${table({
         caption: 'Manual chest counters compared with counting from replays',
         head: ['', 'Manual counter', 'Chest Log'],
         stack: true,
         rows: [
           ['During a match', 'You tap or type each time you open a chest.', 'Nothing. You play normally.'],
-          ['Where the count comes from', 'What you remembered to log.', 'The replay file Fortnite saved.'],
-          ['Match history', 'Usually one running total.', 'A count for every match, and every match on the map.'],
           ['A match you forgot to log', 'Lost.', 'Counted, as long as its replay file still exists.'],
+          ['Match history', 'Usually one running total.', 'A count for every match, and every match on the map.'],
           ['New matches', 'You add them by hand.', `In Chrome or Edge, rechecks your folder every 30 seconds. ${link('/auto-track/', 'Auto tracking')}.`],
           ['Account and uploads', 'Often an account.', `No account. Replays never leave your computer. ${link('/privacy/', 'Privacy')}.`],
-          ['Limits', 'Easy to miss chests in a fight.', 'Windows PC only. A teammate count is what your replay saw.'],
         ],
       })}<p>The in-game Quests tab is not a substitute. Players report that it shows one total with no history by match and stops counting at a cap. ${link('/faq/', 'More on that in the FAQ')}.</p>`,
     },
