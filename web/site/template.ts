@@ -46,7 +46,8 @@ const head = (page: Page, assets: Assets) => {
 <title>${esc(page.title)}</title>
 <meta name="description" content="${esc(page.description)}">
 <link rel="canonical" href="${url}">
-<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="robots" content="index,follow,max-image-preview:large">${SITE.googleVerification ? `
+<meta name="google-site-verification" content="${esc(SITE.googleVerification)}">` : ''}
 <meta name="theme-color" content="${THEME_COLOR}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 ${preloads(assets)}
