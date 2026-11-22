@@ -19,7 +19,7 @@ export const hours: Page = {
   description: `What Fortnite Treasure Hours are. Epic lists boosts of ${psa.hoursBoost}x for Pirate Shop Access, ${gold.hoursBoost}x for the Gold Outfit and ${vehicle.hoursBoost}x for Vehicle & Decal.`,
   h1: 'What Fortnite Treasure Hours are and how they change your odds',
   lede: `<p>Treasure Hours are Epic's scheduled windows with boosted treasure drops. This page lists the boosts Epic published, what they do to your odds, and where Epic announces each one.</p>`,
-  ctas: [{ label: 'Open the odds calculator', href: '/treasure-hunters-odds/', kind: 'primary' }],
+  ctas: [{ label: 'Count my chests', href: SITE.app.track, kind: 'primary' }, { label: 'Open the odds calculator', href: '/treasure-hunters-odds/', kind: 'secondary' }],
   published: '2026-11-22',
   updated: '2026-11-22',
   breadcrumbs: [],
@@ -72,7 +72,7 @@ export const hours: Page = {
     },
     {
       q: 'When is the next Treasure Hours?',
-      a: `Epic announces each one on its Fortnite Communities page and on Fortnite Status. We do not list times here. ${link(SITE.app.track, 'Chest Log')} counts your chests from replays whenever you play.`,
+      a: `Epic announces each one on its Fortnite Communities page and on Fortnite Status. We do not list times here because Epic can change them.`,
     },
   ],
   related: ['treasure-hunters-odds', 'fortnite-replay-files', 'faq', 'auto-track'],

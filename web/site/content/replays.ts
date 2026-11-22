@@ -38,7 +38,7 @@ export const replays: Page = {
     {
       id: 'how-long',
       heading: 'How long replays last',
-      html: `<p>Epic says you can only play a replay in the version of Fortnite that recorded it. After an update, older replays stop being valid unless you saved them. You save a replay by renaming it in the replay browser.</p><p>On PC, Epic says the number of saved replays is unlimited. PlayStation and Xbox allow 10. A replay of a full match is about 10 MB.</p><p>We could not find how many unsaved replays Fortnite keeps on PC or when it clears them. Import your matches soon after you play, and before the next game update. ${link('/auto-track/', 'Auto tracking')} does that for you while a tab is open.</p>${cite('epic-replays')}`,
+      html: `<p>Epic says you can only play a replay in the version of Fortnite that recorded it. After an update, older replays stop being valid unless you saved them. You save a replay by renaming it in the replay browser.</p><p>On PC, Epic says the number of saved replays is unlimited. PlayStation and Xbox allow 10. A replay of a full match is about 10 MB.</p><p>We could not find how many unsaved replays Fortnite keeps on PC or when it clears them. Import your matches soon after you play, and before the next game update. ${link('/auto-track/', 'Auto-track')} does that for you while a tab is open.</p>${cite('epic-replays')}`,
     },
     {
       id: 'use-chest-log',

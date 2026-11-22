@@ -10,7 +10,7 @@ import {
   treasure,
   type Treasure,
 } from '../odds.ts'
-import { CHECKED } from '../config.ts'
+import { CHECKED, SITE } from '../config.ts'
 import { cite, esc, link, longDate, sourceLink, table } from '../html.ts'
 import { pick } from './faq-pool.ts'
 
@@ -67,7 +67,7 @@ export const oddsPage: Page = {
   description: `Epic's chest odds for Treasure Hunters: Pirate Shop Access 1 in ${calc.formatCount(psa.oneIn)}, Weekly Gold Outfit 1 in ${calc.formatCount(gold.oneIn)}. Calculate your own chance.`,
   h1: 'Fortnite Pirate token odds and gold outfit odds',
   lede: `<p>Epic publishes the chance of finding each Treasure Hunters reward every time you open a chest. This page shows those numbers, what they mean for a real chest count, and a calculator for yours. Treasure is shared across the squad, so count every chest your squad opened.</p>`,
-  ctas: [{ label: 'Count your own chests', href: '/app/track', kind: 'primary' }],
+  ctas: [{ label: 'Count my chests', href: SITE.app.track, kind: 'primary' }],
   published: '2026-11-22',
   updated: '2026-11-22',
   breadcrumbs: [],
@@ -98,7 +98,7 @@ export const oddsPage: Page = {
       heading: 'How many chests for a 50% or 90% chance',
       html: `<p>One in ${calc.formatCount(psa.oneIn)} does not mean you are owed a token after ${calc.formatCount(psa.oneIn)} chests. Each chest is a separate roll, and a miss does not make the next chest more likely. The average wait is ${calc.formatCount(psa.oneIn)} chests, but your chance of having found one passes 50% after about ${about(calc.chestsFor(0.5, psa.oneIn, 1))}.</p>${table({
         caption: 'Chests your squad needs to open for a given chance of at least one reward',
-        head: ['Reward', '50% chance', '90% chance', '50% in Treasure Hours', '90% in Treasure Hours'],
+        head: ['Reward', '50% chance', '90% chance', '50%, Treasure Hours', '90%, Treasure Hours'],
         numeric: [1, 2, 3, 4],
         rows: headline.map(entry => [
           esc(entry.name),

@@ -6,13 +6,13 @@ import { FAQ_POOL } from './faq-pool.ts'
 export const autoTrack: Page = {
   slug: 'auto-track',
   type: 'landing',
-  label: 'Auto tracking',
+  label: 'Auto-track',
   title: 'Fortnite Chest Tracker That Counts Matches Automatically',
   description: 'Pick your Fortnite replay folder once. Chest Log rechecks it every 30 seconds in Chrome or Edge and adds each new match to your chest count.',
   h1: 'Auto-track your Fortnite chests',
   lede: `<p>Pick your replay folder once. Chest Log rechecks it every 30 seconds while the tab is open and adds each new match to your count.</p>`,
   ctas: [
-    { label: 'Start auto tracking', href: SITE.app.track, kind: 'primary' },
+    { label: 'Count my chests', href: SITE.app.track, kind: 'primary' },
     { label: 'Try the demo', href: SITE.app.demo, kind: 'secondary' },
   ],
   published: '2026-11-22',
@@ -21,7 +21,7 @@ export const autoTrack: Page = {
   sections: [
     {
       id: 'how',
-      heading: 'How auto tracking works',
+      heading: 'How Auto-track works',
       html: steps([
         { title: 'Pick the folder once', body: `Choose your Fortnite replay folder, ${pathCode(SITE.demosPath)}. Chrome and Edge remember it.` },
         { title: 'Leave the tab open', body: 'Keep the Chest Log tab open while you play. Every 30 seconds it checks the folder for new replay files.' },
@@ -40,7 +40,7 @@ export const autoTrack: Page = {
     {
       id: 'other-browsers',
       heading: 'Other browsers',
-      html: `<p>Firefox and Safari do not let a web page remember a folder, at the time of writing. You can still import replay files in them, but you choose the files each time and there is no auto tracking. If the app does not offer to remember a folder, your browser does not support it.</p>`,
+      html: `<p>Firefox and Safari do not let a web page remember a folder, at the time of writing. You can still import replay files in them, but you choose the files each time and there is no Auto-track. If the app does not offer to remember a folder, your browser does not support it.</p>`,
     },
     {
       id: 'background-tabs',
@@ -56,14 +56,14 @@ export const autoTrack: Page = {
   faq: [
     {
       q: 'Do I need to keep the tab open?',
-      a: `Yes. Auto tracking runs inside the Chest Log tab, so it stops when you close the tab. Open it again and Chest Log reads any replays it missed.`,
+      a: `Yes. Auto-track runs inside the Chest Log tab, so it stops when you close the tab. Open it again and Chest Log reads any replays it missed.`,
     },
     {
       q: 'Why only Chrome and Edge?',
-      a: `Auto tracking needs a browser that lets a page remember a folder on your computer. Chrome and Edge do. Firefox and Safari did not when this page was written.`,
+      a: `Auto-track needs a browser that lets a page remember a folder on your computer. Chrome and Edge do. Firefox and Safari did not when this page was written.`,
     },
     {
-      q: 'Does auto tracking upload my replays?',
+      q: 'Does Auto-track upload my replays?',
       a: `No. The browser reads the replay files on your computer and Chest Log stores the results there. Nothing is sent to a server.`,
     },
     FAQ_POOL.where,

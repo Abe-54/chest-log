@@ -53,7 +53,7 @@ export const home: Page = {
     {
       id: 'how-it-works',
       heading: 'How it works',
-      aside: `<p>Chest Log is a free Fortnite chest counter for Windows PC. With replays turned on, Fortnite saves a file for every match, and Chest Log reads those files inside your browser tab. ${link('/fortnite-replay-files/', 'Where the files are')}.</p>`,
+      aside: `<p>Chest Log is a free Fortnite chest counter for Windows PC. With replays turned on, Fortnite saves a file for every match, and Chest Log reads those files inside your browser tab. ${link('/fortnite-replay-files/', 'Find your replay folder')}.</p>`,
       html: steps([
         { title: 'Pick your Fortnite replay folder', body: 'Chest Log shows you the exact path. Or drop in a single .replay file.' },
         { title: 'Your browser reads the replays', body: 'Every chest you or your squad opened or broke gets counted, match by match.' },
@@ -76,8 +76,8 @@ export const home: Page = {
           ['During a match', 'You tap or type each time you open a chest.', 'Nothing. You play normally.'],
           ['A match you forgot to log', 'Lost.', 'Counted, as long as its replay file still exists.'],
           ['Match history', 'Usually one running total.', 'A count for every match, and every match on the map.'],
-          ['New matches', 'You add them by hand.', `In Chrome or Edge, rechecks your folder every 30 seconds. ${link('/auto-track/', 'Auto tracking')}.`],
-          ['Account and uploads', 'Often an account.', `No account. Replays never leave your computer. ${link('/privacy/', 'Privacy')}.`],
+          ['New matches', 'You add them by hand.', `In Chrome or Edge, it ${link('/auto-track/', 'rechecks your folder every 30 seconds')}.`],
+          ['Account and uploads', 'Often an account.', `No account. ${link('/privacy/', 'Replays never leave your computer')}.`],
         ],
       })}<p>The in-game Quests tab is not a substitute. Players report that it shows one total with no history by match and stops counting at a cap. ${link('/faq/', 'More on that in the FAQ')}.</p>`,
     },

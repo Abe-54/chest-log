@@ -16,8 +16,12 @@ export const logoMark = `<svg class="logo-mark" viewBox="-8 -8 52 52" aria-hidde
 
 const hamburger = `<svg class="menu-icon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path class="menu-open" d="M3 6h18M3 12h18M3 18h18"/><path class="menu-close" d="M5 5l14 14M19 5L5 19"/></svg>`
 
-/** The menu is a details element; this closes it on Escape or a click outside, as a dropdown should. */
-const menuScript = `<script>(function(){function shut(m,focus){m.removeAttribute('open');if(focus)m.querySelector('summary').focus()}document.addEventListener('click',function(e){var m=document.querySelector('details.menu[open]');if(m&&!m.contains(e.target))shut(m,false)});document.addEventListener('keydown',function(e){var m=document.querySelector('details.menu[open]');if(m&&e.key==='Escape')shut(m,true)})})()</script>`
+/** Closes the menu on Escape or an outside tap; hands the page to a PC from a phone by sharing or copying its link. */
+const menuScript = `<script>(function(){var url=location.origin+location.pathname;var toast=document.querySelector('[data-toast]');
+function say(text){toast.textContent=text;toast.classList.add('is-on');clearTimeout(say.t);say.t=setTimeout(function(){toast.classList.remove('is-on')},2600)}
+document.querySelectorAll('[data-send-to-pc]').forEach(function(b){b.addEventListener('click',function(){var data={title:'Chest Log',text:'Count my Fortnite chests on PC',url:url};
+if(navigator.share){navigator.share(data).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){say('Link copied. Open it on your PC.')},function(){say(url)})}else{say(url)}})});
+function shut(m,focus){m.removeAttribute('open');if(focus)m.querySelector('summary').focus()}document.addEventListener('click',function(e){var m=document.querySelector('details.menu[open]');if(m&&!m.contains(e.target))shut(m,false)});document.addEventListener('keydown',function(e){var m=document.querySelector('details.menu[open]');if(m&&e.key==='Escape')shut(m,true)})})()</script>`
 
 const NAV = [
   { href: '/#how-it-works', text: 'How it works' },
@@ -28,7 +32,7 @@ const NAV = [
 /** Every page is linked from every footer, so no page depends on the home page for internal links. */
 const FOOTER = [
   { slug: 'treasure-hunters-odds', text: 'Token odds' },
-  { slug: 'fortnite-replay-files', text: 'Replay folder help', short: 'Folder help' },
+  { slug: 'fortnite-replay-files', text: 'Replay files', short: 'Replay files' },
   { slug: 'treasure-hours', text: 'Treasure Hours' },
   { slug: 'auto-track', text: 'Auto-track' },
   { slug: 'faq', text: 'FAQ' },
@@ -88,7 +92,8 @@ const header = () => `<a class="skip" href="#main">Skip to content</a>
 ].join('')}</nav></details>
 </div></header>`
 
-const footer = () => `<footer class="site-footer"><div class="foot">
+const footer = () => `<p class="toast" data-toast role="status" aria-live="polite"></p>
+<footer class="site-footer"><div class="foot">
 <div class="foot-id"><a class="foot-brand" href="/">${SITE.name}</a><p class="disclaimer">${SITE.disclaimer}</p></div>
 <nav class="foot-nav" aria-label="Guides">${FOOTER.map(item => `<a href="${pageUrl(item.slug)}">${'short' in item ? `<span class="wide-only">${item.text}</span><span class="narrow-only">${item.short}</span>` : item.text}</a>`).join('')}</nav>
 </div></footer>`
@@ -96,8 +101,17 @@ const footer = () => `<footer class="site-footer"><div class="foot">
 const button = (cta: Cta, extra = '') =>
   `<a class="btn${cta.kind === 'secondary' ? ' btn-ghost' : ''}${extra}" href="${esc(cta.href)}">${esc(cta.label)}</a>`
 
+/** A shared answer that ends by pointing at the page it already sits on drops that closing sentence. */
+const withoutSelfLink = (answer: string, page: Page) => {
+  const self = `<a href="${pageUrl(page.slug)}">`
+  const at = answer.lastIndexOf(self)
+  if (at < 0) return answer
+  const start = answer.lastIndexOf('. ', at)
+  return start < 0 ? answer : answer.slice(0, start + 1)
+}
+
 const faqItems = (page: Page) =>
-  `<div class="qa-list">${page.faq.map((entry, at) => `<details class="qa"${at === 0 ? ' open' : ''}><summary>${esc(entry.q)}</summary><div class="answer"><p>${entry.a}</p></div></details>`).join('')}</div>`
+  `<div class="qa-list">${page.faq.map((entry, at) => `<details class="qa"${at === 0 ? ' open' : ''}><summary>${esc(entry.q)}</summary><div class="answer"><p>${withoutSelfLink(entry.a, page)}</p></div></details>`).join('')}</div>`
 
 const faqHeading = (page: Page) => (page.type === 'faq' ? 'Questions and answers' : 'Questions')
 
@@ -115,13 +129,10 @@ const homeSection = (section: Page['sections'][number]) => {
 const homeCtas = (extra = '') => `<p class="cta-row on-pc">${button({ label: 'Count my chests', href: SITE.app.track, kind: 'primary' })}${button({ label: 'Try the demo', href: SITE.app.demo, kind: 'secondary' }, extra)}</p><p class="cta-row on-touch">${button({ label: 'Try the demo', href: SITE.app.demo, kind: 'primary' })}<button type="button" class="btn btn-ghost${extra}" data-send-to-pc>Send this to my PC</button></p>`
 
 /** Shares the page link on phones (or copies it), and keeps the header button out of the way while the hero's own buttons are on screen. */
-const homeScript = `(function(){var url=location.origin+'/';var toast=document.querySelector('[data-toast]');
-function say(text){toast.textContent=text;toast.classList.add('is-on');clearTimeout(say.t);say.t=setTimeout(function(){toast.classList.remove('is-on')},2600)}
-document.querySelectorAll('[data-send-to-pc]').forEach(function(b){b.addEventListener('click',function(){var data={title:'Chest Log',text:'Count my Fortnite chests on PC',url:url};
-if(navigator.share){navigator.share(data).catch(function(){})}else if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){say('Link copied. Open it on your PC.')},function(){say(url)})}else{say(url)}})});
-if(!('IntersectionObserver' in window))return;
-var rows=document.querySelectorAll('.hero-copy .cta-row');new IntersectionObserver(function(es){var on=es.some(function(e){return e.isIntersecting});document.body.classList.toggle('hero-cta-on',on)}).observe(rows[0]);
-rows[1]&&new IntersectionObserver(function(es){if(es[0].isIntersecting)document.body.classList.add('hero-cta-on')}).observe(rows[1])})()`
+/** Keeps the header button out of the way while the hero's own buttons are on screen. */
+const homeScript = `(function(){if(!('IntersectionObserver' in window))return;
+var rows=document.querySelectorAll('.hero-copy .cta-row'),seen=new Map();
+var io=new IntersectionObserver(function(es){es.forEach(function(e){seen.set(e.target,e.isIntersecting)});document.body.classList.toggle('hero-cta-on',Array.from(seen.values()).some(Boolean))});rows.forEach(function(r){io.observe(r)})})()`
 
 const renderHome = (page: Page, assets: Assets) => `<main id="main">
 <section class="hero">
@@ -135,8 +146,7 @@ ${mapHero(assets.map)}
 ${page.sections.map(homeSection).join('\n')}
 <section class="home-section faq-home" id="faq-list" aria-labelledby="faq-h"><div class="wrap"><h2 id="faq-h">${faqHeading(page)}</h2>${faqItems(page)}<p class="faq-stamp">Answers updated <time datetime="${page.updated}">${longDate(page.updated)}</time>. <a href="/faq/">All questions</a></p></div></section>
 <section class="final-cta" aria-labelledby="cta-h"><div class="final-map" aria-hidden="true" style="background-image:url(${assets.map.small})"></div><div class="wrap"><h2 id="cta-h"><span class="on-pc">How many chests did your squad open this week?</span><span class="on-touch">See a real squad's week in the demo</span></h2>${homeCtas(' cta-btn-secondary')}</div></section>
-</main>
-<p class="toast" data-toast role="status" aria-live="polite"></p>`
+</main>`
 
 /* Articles */
 
@@ -174,7 +184,8 @@ const tocNav = (page: Page) =>
 
 const DEFAULT_CTA: Cta = { label: 'Count my chests', href: SITE.app.track, kind: 'primary' }
 
-const ctaCard = (page: Page) => `<aside class="cta-card" aria-labelledby="cta-h"><div><h2 id="cta-h">Get your own number</h2><p>Count your real chests from your replays. Nothing uploaded.</p></div><p class="cta-row">${(page.ctas ?? [DEFAULT_CTA]).map(cta => button(cta, ' btn-inline')).join('')}</p></aside>`
+/** Like the home page, phones get the demo and a way to send the page to their PC, never a tracker they cannot run. */
+const ctaCard = (page: Page) => `<aside class="cta-card" aria-labelledby="cta-h"><div><h2 id="cta-h">Get your own number</h2><p class="on-pc">Count your real chests from your replays. Nothing uploaded.</p><p class="on-touch">Counting needs the replay files on your Windows PC. Send this page there, or see a real squad's week in the demo.</p></div><p class="cta-row on-pc">${(page.ctas ?? [DEFAULT_CTA]).map(cta => button(cta, ' btn-inline')).join('')}</p><p class="cta-row on-touch">${button({ label: 'Try the demo', href: SITE.app.demo, kind: 'primary' }, ' btn-inline')}<button type="button" class="btn btn-ghost btn-inline" data-send-to-pc>Send this to my PC</button></p></aside>`
 
 const related = (page: Page) =>
   page.related.length === 0
@@ -189,10 +200,10 @@ const related = (page: Page) =>
 /** A contents list earns its column only when there are at least three places to jump to. */
 const MIN_TOC = 3
 
-const renderArticle = (page: Page) => {
+const renderArticle = (page: Page, assets: Assets) => {
   const toc = tocEntries(page).length >= MIN_TOC
   return `<main id="main"${toc ? '' : ' class="no-toc"'}>
-<header class="art-head"><div class="art-head-in">
+<header class="art-head"><div class="art-map" aria-hidden="true" style="background-image:url(${assets.map.small})"></div><div class="art-head-in">
 ${crumbs(page)}<h1>${esc(page.h1)}</h1>
 <div class="lede">${page.lede}</div>
 <p class="meta"><span>Updated <time datetime="${page.updated}">${shortDate(page.updated)}</time></span><span>${readMinutes(page)} min read</span></p>
@@ -219,7 +230,7 @@ ${head(page, assets)}
 </head>
 <body class="${home ? 'page-home' : 'page-article'}">
 ${header()}
-${home ? renderHome(page, assets) : renderArticle(page)}
+${home ? renderHome(page, assets) : renderArticle(page, assets)}
 ${footer()}
 ${menuScript}${home ? `\n<script>${mapHeroScript}</script>\n<script>${homeScript}</script>` : `\n<script defer src="${assets.toc}"></script>`}${page.script ? `\n<script>${page.script}</script>` : ''}
 ${analytics}

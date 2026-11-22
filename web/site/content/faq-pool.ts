@@ -31,7 +31,7 @@ export const FAQ_POOL = {
   },
   browser: {
     q: 'Which browsers work?',
-    a: `Any current browser can import replay files. Chrome and Edge can also remember your replay folder, which ${link('/auto-track/', 'auto tracking')} needs. In Firefox and Safari you choose the files again each visit.`,
+    a: `Any current browser can import replay files. Chrome and Edge can also remember your replay folder, which ${link('/auto-track/', 'Auto-track')} needs. In Firefox and Safari you choose the files again each visit.`,
   },
   missing: {
     q: 'Why are some of my matches missing?',
