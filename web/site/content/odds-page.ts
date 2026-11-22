@@ -82,7 +82,7 @@ export const oddsPage: Page = {
         rows: ALL_TREASURES.map(entry => [esc(entry.name), oneInText(entry), calc.formatPercent(1 / entry.oneIn)]),
       })}${cite('epic-drop-rates')}<p>The percent column is our arithmetic from Epic's ratios.</p>`,
     },
-    { id: 'calculator', heading: 'Calculator: your chance from your chest count', html: calculatorHtml },
+    { id: 'calculator', heading: 'Calculate your chance from your chest count', html: calculatorHtml },
     {
       id: 'by-count',
       heading: 'Chance by number of chests',
