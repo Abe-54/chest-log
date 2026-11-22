@@ -63,7 +63,7 @@ export const FAQ_POOL = {
   },
   newMatches: {
     q: 'How do I add new matches?',
-    a: `Install the ${link('/companion/', 'Chest Log Companion')} and each match is counted a few seconds after it ends. Without it, choose your Demos folder again after you play. Matches already counted are skipped. Browsers do not let a website watch that folder by itself, because Windows keeps it inside AppData.`,
+    a: `Install the ${link('/companion/', 'Chest Log Companion')} and each match is counted within a minute of the end. Without it, choose your Demos folder again after you play. Matches already counted are skipped. Browsers do not let a website watch that folder by itself, because Windows keeps it inside AppData.`,
   },
   speed: {
     q: 'How long does an import take?',

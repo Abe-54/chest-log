@@ -251,7 +251,7 @@ function ConnectedPanel({ companion, state }: { companion: Extract<CompanionStat
               </li>
             ))}
             {companion.session.length === 0 && (
-              <li className="border-b border-line-soft py-4 text-[15px] text-mist-2">Keep this tab open while you play. Each match shows up here a few seconds after it ends.</li>
+              <li className="border-b border-line-soft py-4 text-[15px] text-mist-2">Keep this tab open while you play. Each match shows up here within a minute of the end.</li>
             )}
           </ol>}
     </section>

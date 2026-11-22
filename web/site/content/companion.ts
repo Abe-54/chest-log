@@ -46,7 +46,7 @@ export const companion: Page = {
         { title: 'Download and run it', body: `Get ${link(download, 'ChestLogCompanion.exe')} and open it. It has no installer and runs from wherever you keep it.` },
         { title: 'Get past the Windows warning', body: 'The app is not signed with a paid certificate yet, so Windows SmartScreen may say it protected your PC. Choose More info, then Run anyway. The next section shows how to check the file first.' },
         { title: 'Connect Chest Log', body: `Open ${link(SITE.app.track, 'Chest Log')} and choose Connect. Chrome asks to let the site access other apps and services on this device. Choose Allow, because that is how the page reaches the companion.` },
-        { title: 'Play', body: 'Keep the Chest Log tab open. Each match shows up a few seconds after it ends.' },
+        { title: 'Play', body: 'Keep the Chest Log tab open. Each match shows up within a minute of the end.' },
       ])}`,
     },
     {
@@ -57,7 +57,7 @@ export const companion: Page = {
     {
       id: 'remove',
       heading: 'Turn it off or remove it',
-      html: `<p>Right-click the Chest Log icon in the tray by the clock. Untick Start with Windows to stop it starting on its own, or choose Quit to stop it now. To remove it, quit it and delete the file. It leaves nothing else behind except the start-with-Windows entry, which unticking removes.</p>`,
+      html: `<p>Right-click the Chest Log icon by the clock. On Windows 11 it may sit behind the arrow next to the other tray icons. Untick Start with Windows to stop it starting on its own, or choose Quit to stop it now. To remove it, quit it and delete the file. Unticking Start with Windows removes its startup entry. The only other thing it keeps is one small setting that remembers you unticked it, and the README says how to delete that too.</p>`,
     },
     {
       id: 'extension',
