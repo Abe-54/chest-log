@@ -52,7 +52,7 @@ export const companion: Page = {
     {
       id: 'check',
       heading: 'Check it yourself',
-      html: `<p>The companion is about 300 lines of Go. ${link(source, 'Read the source on GitHub')}, including its own README.</p><p>Every download is built from that source by GitHub's servers, not on anyone's computer. Each ${link(releases, 'release')} lists a SHA-256 checksum for every file, and GitHub signs a record of which commit and workflow built it. With the GitHub CLI you can check a download against that record:</p><pre class="formula" tabindex="0"><code>gh attestation verify ChestLogCompanion.exe --repo Abe-54/chest-log</code></pre><p>You can also build it yourself with Go. The steps are in the companion's README.</p>`,
+      html: `<p>The companion is about 400 lines of Go, plus its tests. ${link(source, 'Read the source on GitHub')}, including its own README.</p><p>Every download is built from that source by GitHub's servers, not on anyone's computer. Each ${link(releases, 'release')} lists a SHA-256 checksum for every file, and GitHub signs a record of which commit and workflow built it. With the GitHub CLI you can check a download against that record:</p><pre class="formula" tabindex="0"><code>gh attestation verify ChestLogCompanion.exe --repo Abe-54/chest-log</code></pre><p>You can also build it yourself with Go. The steps are in the companion's README.</p>`,
     },
     {
       id: 'remove',
